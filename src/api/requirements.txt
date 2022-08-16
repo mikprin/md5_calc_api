@@ -6,3 +6,4 @@ sqlalchemy-utils
 uvicorn
 aiofiles
 requests
+psycopg2

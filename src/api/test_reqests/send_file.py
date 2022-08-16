@@ -1,3 +1,4 @@
+from importlib.metadata import files
 import requests
 import os, sys
 
@@ -11,14 +12,22 @@ test_file_name = "test_file"
 
 test_file_path = os.path.join( test_script_path , test_file_name)
 
-# test_file = open("test_file", "rb")
-with open(test_file_path) as test_file:
-    test_response = requests.post(test_url, data={'filename': test_file , "msg":"hello" ,"type" : "multipart/form-data"}, files = { "file" : test_file  } )
 
-# test_response = requests.post(test_url, files = {"form_field_name": test_file})
+def send_file(test_file_path):
+    # test_file = open("test_file", "rb")
+    with open(test_file_path) as test_file:
+        # test_response = requests.post(test_url, data={'filename': test_file , "msg":"hello" ,"type" : "multipart/form-data"}, files = { "file" : test_file  } )
+        test_response = requests.post(test_url, data={'filename': test_file_name , "msg":"hello" ,"type" : "multipart/form-data"}, files = { "file" : test_file} )
 
-if test_response.ok:
-    print("Upload completed successfully!")
-    print(test_response.text)
-else:
-    print(f"Something went wrong! Answer: {test_response.text}")
+    # test_response = requests.post(test_url, files = {"form_field_name": test_file})
+
+    if test_response.ok:
+        print("Upload completed successfully!")
+        print(test_response.text)
+    else:
+        print(f"Something went wrong! Answer: {test_response.text}")
+    return test_response.status_code
+
+
+if __name__ == '__main__':
+    send_file(test_file_path)
