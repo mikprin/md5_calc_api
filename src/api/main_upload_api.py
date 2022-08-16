@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile # fastapi
 from pydantic import BaseModel
-import logging,sys # logging
+import logging,sys,os # logging, system
+import aiofiles
 
 # Check some additional imports for python < 3.10
 if sys.version_info.minor < 10:
@@ -17,6 +18,12 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
 
+### Settings ###
+
+spurce_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+filesystem_work_point = spurce_path
+
+
 ### FastAPI ###
 
 # print("app started")
@@ -31,6 +38,10 @@ async def root():
     return {"message": "Hello World"}
 
 @app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile):
-    logging.info(f'Got file transfer! Fname: {file}')
-    return {"filename": file.filename}
+async def create_upload_file(incoming_file: UploadFile):
+    logging.info(f'Got file transfer! Fname: {incoming_file}')
+    # Save complete file in memory
+    
+
+    # Save file in chunks
+    return {"id": 1}
