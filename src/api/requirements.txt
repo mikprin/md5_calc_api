@@ -1,0 +1,8 @@
+fastapi
+celery
+SQLAlchemy
+python-multipart
+sqlalchemy-utils
+uvicorn
+aiofiles
+requests
