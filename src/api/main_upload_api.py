@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from re import I
 from fastapi import FastAPI, File, UploadFile # fastapi
 from pydantic import BaseModel
 import logging,sys,os # logging, system
@@ -30,6 +32,10 @@ filesystem_work_point = spurce_path
 logging.info("Main script started")
 app = FastAPI()
 
+database = {
+    1 : {"hash": 1},
+    2 : { "hash" : 2 }     
+         }
 
 @app.get("/")
 async def root():
@@ -37,11 +43,16 @@ async def root():
     logging.info(f'Got root request!')
     return {"message": "Hello World"}
 
+@app.get("/gethash/{file_id}")
+async def get_file(file_id: int ):
+    ''' Get MD5 from the server back '''
+    hash = "12341234"
+    # Check that hash exists in the database here
+    return hash
+
 @app.post("/uploadfile/")
 async def create_upload_file(incoming_file: UploadFile):
     logging.info(f'Got file transfer! Fname: {incoming_file}')
     # Save complete file in memory
-    
-
     # Save file in chunks
     return {"id": 1}
