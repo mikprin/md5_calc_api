@@ -41,7 +41,9 @@ async def root():
 async def create_upload_file(incoming_file: UploadFile):
     logging.info(f'Got file transfer! Fname: {incoming_file}')
     # Save complete file in memory
-    
+    async with aiofiles.open(saved_file_path, "wb") as saved_file:
+        content_of_file = await incoming_file.read()
+        await saved_file.write(content_of_file)
 
     # Save file in chunks
     return {"id": 1}
