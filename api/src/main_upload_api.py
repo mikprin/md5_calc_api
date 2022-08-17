@@ -114,7 +114,7 @@ async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
     
     if database.add_file_to_quene(id, filename):
         saved_file_path = os.path.join( filesystem_work_point , filename)
-        save_file(file,saved_file_path)
+        await save_file(file,saved_file_path)
         return {"id": id, "status": "success"}
         
     else:
@@ -131,8 +131,9 @@ async def create_upload_file(request: Request, source: str = "api" ,  file: Uplo
     logging.info(f'Got incoming file transfer from HTML page!')
     id = database.get_new_id()
     filename = str(id)
-    saved_file_path = os.path.join( filesystem_work_point , filename)
-    save_file(file,saved_file_path)
+    if database.add_file_to_quene(id, filename):
+        saved_file_path = os.path.join( filesystem_work_point , filename)
+        await save_file(file,saved_file_path)
     return templates.TemplateResponse("return_id.html", { "request": request , "id": id })
 
 

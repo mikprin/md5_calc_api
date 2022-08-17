@@ -18,9 +18,9 @@ def get_postgres_engine(user,password,host,port, pgdb,debug=False):
     url = f"postgresql://{user}:{password}@{host}:{port}/{pgdb}"
     if not db_util.database_exists(url):
         db_util.create_database(url)
-        print("No database found, database created")
+        logging.info(f"No database found, database created")
     engine = db.create_engine(url,pool_size=50, echo=debug)
-    print(f"connected to database {engine.url}")
+    logging.info(f"connected to database {engine.url}")
     return engine
 
 def get_session(postgres_credentials):
@@ -79,7 +79,9 @@ class API_database( ):
         try:
             new_id = [x for x in range(ids[0], ids[-1]+1) if x not in ids][0]
         except IndexError:
-            new_id = ids[-1] + 1
+            if len(ids) > 0:
+                new_id = ids[-1] + 1
+            else: new_id = 1
         return new_id
 
     def get_all_ids(self):
