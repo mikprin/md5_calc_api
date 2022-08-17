@@ -7,7 +7,8 @@
     .
     ├── build                   # Compiled files
     ├── docs                    # Documentation and task files
-    ├── src                     # Source files for API. Including docker build scripts
+    ├── api                     # Source files for API. Including docker build scripts
+    ├── celery                  # 
     ├── docker                  # Docker config files for external pre build modules (postgres etc) 
     ├── tests                   # Automated and not so automated tests
     ├── tools                   # Tools and utilities
@@ -24,6 +25,10 @@ Tests folder consists of set of tests for the API goal. `simple_test.py` provide
 
 # Build and deployment
 ## Dependencies
+
+Docker (for container managment). You can read about installing docker here: https://docs.docker.com/engine/install/
+
+
 ### Ubuntu
 postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygwin/Babun.)
 
