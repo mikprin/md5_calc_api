@@ -14,12 +14,22 @@ fake_database = False
 # Id range of int values
 id_range = (1,int(1e1))
 
+docker_deploy = True
 
 # Database credentials
-postgres_credentials = {
-    "pguser" : 'postgres',
-    "pgpassword" : "example",
-    'pghost' : "localhost",
-    'pgport' : 5432,
-    'pgdb' : 'md5hashes',
-}
+if docker_deploy:
+    postgres_credentials = {
+        "pguser" : 'postgres',
+        "pgpassword" : "example",
+        'pghost' : "host.docker.internal",
+        'pgport' : 5432,
+        'pgdb' : 'md5hashes',
+    }
+else:
+    postgres_credentials = {
+        "pguser" : 'postgres',
+        "pgpassword" : "example",
+        'pghost' : "localhost",
+        'pgport' : 5432,
+        'pgdb' : 'md5hashes',
+    }

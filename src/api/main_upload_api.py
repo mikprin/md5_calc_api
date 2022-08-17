@@ -48,6 +48,7 @@ try:
 except:
     logging.error("""Failed to open database. Terminating. Possible solutions are:
                     check database container is running, check credentials (password, URL and user).
+                    Check networking and port availability from your machine!
                 """)
     sys.exit("Database connection error.")
 database = API_database(database_sesstion,database_engine)

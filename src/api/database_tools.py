@@ -36,7 +36,6 @@ def get_session(postgres_credentials):
     
     return session,engine
 
-
 # Classes for database tables
 
 class FileForProcessing(Base):
@@ -88,9 +87,12 @@ class API_database( ):
         ids_list = [i[0] for i in ids]
         return ids_list
         
-        
     def drop_all_files(self):
-        FileForProcessing.__table__.drop(self.engine)
+        # FileForProcessing.__table__.drop(self.engine) # NOT WORKING COORECTLY!
+        for id in self.get_all_ids():
+            self.session.query(FileForProcessing).filter(FileForProcessing.id==id).delete()
+            # file_to_delete = FileForProcessing.query.get(id)
+            # self.session.delete(file_to_delete)
         self.session.commit()
 
 # def add_file_to_database(id,path):
