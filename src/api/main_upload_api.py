@@ -108,16 +108,18 @@ async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
 
     # Save complete file in memory
     # Generate temp filename ( #TODO )
-    id = get_new_file_id(database, debug=True)
+    id = database.get_new_id()
     filename = str(id)
-    saved_file_path = os.path.join( filesystem_work_point , filename)
-    save_file(file,saved_file_path)
     
-    # Add to database:
-    database.add_file_to_quene(id, filename)
+    if database.add_file_to_quene(id, filename):
+        saved_file_path = os.path.join( filesystem_work_point , filename)
+        save_file(file,saved_file_path)
+        return {"id": id, "status": "success"}
+        
+    else:
+        return {"id": None, "status": "fail"}
+
     
-    
-    return {"id": id}
 
 
 
@@ -126,7 +128,7 @@ async def create_upload_file(request: Request, source: str = "api" ,  file: Uplo
     ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
     logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer from HTML page!')
-    id = get_new_file_id(database, debug=True)
+    id = database.get_new_id()
     filename = str(id)
     saved_file_path = os.path.join( filesystem_work_point , filename)
     save_file(file,saved_file_path)
@@ -169,19 +171,19 @@ async def get_upload_form(request: Request):
 
 ### Non API call functions ###
 
-def get_new_file_id(database, debug = False):
-    '''Non locking database ID scan'''
-    # ids = np.array( database.keys() ) List version turn out to be faster on more then 1e4 id's
-    if not debug:
-        ids =  database.keys()
-        found_id = False
-        while not found_id:
-            new_id = random.randint(*id_range)
-            if not (new_id in ids):
-                found_id = True
-        return new_id
-    else:
-        return random.randint(*id_range)
+# def get_new_file_id(database, debug = False):
+#     '''Non locking database ID scan'''
+#     # ids = np.array( database.keys() ) List version turn out to be faster on more then 1e4 id's
+#     if not debug:
+#         ids =  database.keys()
+#         found_id = False
+#         while not found_id:
+#             new_id = random.randint(*id_range)
+#             if not (new_id in ids):
+#                 found_id = True
+#         return new_id
+#     else:
+#         return random.randint(*id_range)
     
 
 async def save_file(file, saved_file_path):

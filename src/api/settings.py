@@ -12,7 +12,7 @@ debug_api_calls = True
 fake_database = False
 
 # Id range of int values
-id_range = (1,int(1e4))
+id_range = (1,int(1e1))
 
 
 # Database credentials

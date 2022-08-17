@@ -1,12 +1,15 @@
 # Database
+from hashlib import new
 import sqlalchemy as db
-import time
+import time, random
 import logging
 import sqlalchemy_utils as db_util
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Date, Enum, BigInteger, Integer, String
 from sqlalchemy.orm import declarative_base, relationship
 Base = declarative_base()
+
+from settings import *
 
 
 ## Connect to database (init of SQLAlchemy) ##
@@ -63,20 +66,29 @@ class API_database( ):
         try:
             self.session.commit()
             logging.info(f'Sucsessfully added file {id} to database.')
+            return 1
         except Exception as error:
             logging.error(f"FAILED TO ADD COMMIT TO DATABASE")
             logging.error(f"Error message: {error}")
+            self.session.rollback()
+            logging.info(f"Database rollback")
+            return 0
         
     def get_new_id(self):
-        # ids =  database.keys()
-        # found_id = False
-        # while not found_id:
-        #     new_id = random.randint(*id_range)
-        #     if not (new_id in ids):
-        #         found_id = True
-        # return new_id
-        pass
+        ids =  self.get_all_ids()
+        ids.sort()
+        try:
+            new_id = [x for x in range(ids[0], ids[-1]+1) if x not in ids][0]
+        except IndexError:
+            new_id = ids[-1] + 1
+        return new_id
 
+    def get_all_ids(self):
+        ids = self.session.query(FileForProcessing.id).all()
+        ids_list = [i[0] for i in ids]
+        return ids_list
+        
+        
     def drop_all_files(self):
         FileForProcessing.__table__.drop(self.engine)
         self.session.commit()
