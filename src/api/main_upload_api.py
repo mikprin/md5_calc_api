@@ -140,24 +140,3 @@ def add_file_to_database(id:int,filename):
     database[id] = { "hash" : datetime }
     
     
-## Work with database (init of SQLAlchemy) ##
-
-def get_postgres_engine(user,password,host,port, pgdb):
-    url = f"postgresql://{user}:{password}@{host}:{port}/{pgdb}"
-    if not db_util.database_exists(url):
-        db_util.create_database(url)
-        print("No database found, database created")
-    engine = db.create_engine(url,pool_size=50, echo=False)
-    print(f"connected to database {engine.url}")
-    return engine
-
-def get_session():
-    engine = get_postgres_engine(
-        postgres_credentials['pguser'],
-        postgres_credentials['pgpassword'],
-        postgres_credentials['pghost'],
-        postgres_credentials['pgport'],
-        postgres_credentials['pgdb']
-    )
-    session = sessionmaker(bind=engine)()
-    return session
