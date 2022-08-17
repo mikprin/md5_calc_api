@@ -1,8 +1,13 @@
-from dataclasses import dataclass
+# Import config settings
+from settings import *
+
+
 from datetime import datetime
-from re import I
-from fastapi import FastAPI, File, UploadFile # fastapi
-from pydantic import BaseModel
+
+from fastapi import FastAPI, File, UploadFile, Request # fastapi
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import logging,sys,os # logging, system
 import aiofiles
 from threading import Thread
@@ -10,17 +15,20 @@ from threading import Lock
 import random
 import numpy as np
 
+# from dataclasses import dataclass
+# from re import I
+
 # For quck file copy?
-import shutil
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import Callable
+# import shutil
+# from pathlib import Path
+# from tempfile import NamedTemporaryFile
+# from typing import Callable
 
-
-# Database
-import sqlalchemy as db
-import sqlalchemy_utils as db_util
-from sqlalchemy.orm import sessionmaker
+if not fake_database:
+    # Database
+    import sqlalchemy as db
+    import sqlalchemy_utils as db_util
+    from sqlalchemy.orm import sessionmaker
 
 #TODO
 # Temp measure for importing DB settings
@@ -48,19 +56,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
 
-### Settings ###
 
-# spurce_path = os.path.dirname(os.path.realpath(sys.argv[0]))
-
-filesystem_work_point = "."
-
-save_in_chunkes = False
-chunk_size = 2048
-# Deployment unsafe development functions
-debug_api_calls = True
-
-# Id range of int values
-id_range = (1,int(1e4))
 
 ### FastAPI ###
 
@@ -122,6 +118,16 @@ if debug_api_calls:
         logging.info(f'Database unload request request!')
         return database
 
+# Static HTML
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/items/{id}", response_class=HTMLResponse)
+async def read_item(request: Request, id: str):
+    return templates.TemplateResponse("item.html", {"request": request, "id": id})
+
+
+
 ### Non API call functions ###
 
 def get_new_file_id(database):
@@ -136,7 +142,10 @@ def get_new_file_id(database):
     return new_id
 
 def add_file_to_database(id:int,filename):
-    global database
-    database[id] = { "hash" : datetime }
-    
+    if fake_database:
+        # global database
+        database[id] = { "hash" : datetime }
+    else:
+        #Add file to database for real
+        pass
     

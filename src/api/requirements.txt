@@ -7,3 +7,4 @@ uvicorn
 aiofiles
 requests
 psycopg2
+jinja2
