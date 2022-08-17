@@ -21,5 +21,5 @@ postgres_credentials = {
     "pgpassword" : "example",
     'pghost' : "localhost",
     'pgport' : 5432,
-    'pgdb' : 'postgres',
+    'pgdb' : 'md5hashes',
 }

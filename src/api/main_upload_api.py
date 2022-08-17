@@ -8,7 +8,7 @@ from fastapi import FastAPI, File, UploadFile, Request, Body # fastapi
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import logging,sys,os, pathlib, json, time # logging, system
+import logging,sys,os, glob, pathlib, json, time # logging, system
 import aiofiles
 from threading import Thread
 from threading import Lock
@@ -33,23 +33,25 @@ logging.info(f"Working dir: {current_dir}")
 
 
 # There are two options for database: real one and a temp one in memory
-if not fake_database:
-    # Database imports if used
-    logging.info("Using real database. Trying to connect")
-    # import sqlalchemy as db
-    # import sqlalchemy_utils as db_util
-    # from sqlalchemy.orm import sessionmaker
-    from database_tools import *
-    
-    ### Initiage database (using database tools) ###
-    try:
-        database_sesstion,database_engine = get_session(postgres_credentials)
-    except:
-        logging.error("""Failed to open database. Terminating. Possible solutions are:
-                      check database container is running, check credentials (password and user).
-                      Also it is possible to set `fake_database = True` as a config variable to use temperary database in memory""")
-        pass
 
+# Database imports if used
+logging.info("Using real database. Trying to connect")
+# import sqlalchemy as db
+# import sqlalchemy_utils as db_util
+# from sqlalchemy.orm import sessionmaker
+from database_tools import *
+
+### Initiage database (using database tools) ###
+try:
+    database_sesstion,database_engine = get_session(postgres_credentials)
+    
+except:
+    logging.error("""Failed to open database. Terminating. Possible solutions are:
+                    check database container is running, check credentials (password, URL and user).
+                """)
+    sys.exit("Database connection error.")
+database = API_database(database_sesstion,database_engine)
+    
 #TODO
 # Temp measure for importing DB settings
 
@@ -72,23 +74,14 @@ os.makedirs(filesystem_work_point, exist_ok=True)
 app = FastAPI()
 
 # Temp database created
-database = {
-    1 : {"hash": 1},
-    2 : { "hash" : 2 }     
-         }
+
 
 @app.get("/")
 async def root():
     # print("LOG LOG LOG")
     logging.info(f'Got root request!')
-    return {"message": "Hello World"}
+    return {"message": "Welcome you on my BG task submission API"}
 
-@app.get("/gethash/{file_id}")
-async def get_file(file_id: int ):
-    ''' Get MD5 from the server back '''
-    hash = "12341234"
-    # Check that hash exists in the database here
-    return hash
 
 @app.get("/gethash/")
 async def get_file(file_id: int ):
@@ -97,27 +90,101 @@ async def get_file(file_id: int ):
     # Check that hash exists in the database here
     return hash
 
+@app.get("/gethash/{file_id}")
+async def get_file(file_id: int ):
+    ''' Get MD5 from the server back but pass URL as ID '''
+    hash = "12341234"
+    # Check that hash exists in the database here
+    return hash
+
+
+
+
 @app.post("/uploadfile/")
-async def create_upload_file(request: Request, file: UploadFile = File(...)) :
+async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
+    ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
     logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer!')
-    # print("++++++++++")
-    # json_formatted_str = json.dumps(request.json(), indent=2)
-    # print(json_formatted_str)
-    # print("++++++++++")
-    # if request.source
 
     # Save complete file in memory
-    
     # Generate temp filename ( #TODO )
-    id = get_new_file_id(database)
+    id = get_new_file_id(database, debug=True)
     filename = str(id)
     saved_file_path = os.path.join( filesystem_work_point , filename)
+    save_file(file,saved_file_path)
     
-    # Simpler way
-    # with open(saved_file_path, "wb") as buffer:
-    #     shutil.copyfileobj(file.file, buffer)
+    # Add to database:
+    database.add_file_to_quene(id, filename)
     
+    
+    return {"id": id}
+
+
+
+@app.post("/uploadfile-html/")
+async def create_upload_file(request: Request, source: str = "api" ,  file: UploadFile = File(...)) :
+    ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
+    logging.info(f"Incoming request: {request.body()}")
+    logging.info(f'Got incoming file transfer from HTML page!')
+    id = get_new_file_id(database, debug=True)
+    filename = str(id)
+    saved_file_path = os.path.join( filesystem_work_point , filename)
+    save_file(file,saved_file_path)
+    return templates.TemplateResponse("return_id.html", { "request": request , "id": id })
+
+
+if debug_api_calls:
+    @app.get("/get-database/")
+    async def get_database():
+        '''Debug call to return the database. Debug methods can be turned off with debug_api_calls = False'''
+        logging.info(f'Database unload request request!')
+        return database #TODO return database here
+    
+    @app.post("/cleardatabase/")
+    async def clear_database():
+        '''Debug call to clear all database. Debug methods can be turned off with debug_api_calls = False'''
+        logging.info(f'Deleting database!')
+        database.drop_all_files()    
+        logging.info(f'Deleting files!')
+        files = glob.glob(os.path.join(filesystem_work_point,"*"))
+        for f in files:
+            os.remove(f)
+
+        
+
+# Static HTML
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/uploadform/", response_class=HTMLResponse)
+async def get_upload_form(request: Request):
+    '''Static HTML app to Upload file and get ID of the file back.'''
+    return templates.TemplateResponse("upload_file.html", { "request": request })
+
+# @app.get("/showid", response_class=HTMLResponse)
+# async def get_upload_form(request: Request):
+#     return templates.TemplateResponse("showid.html", { "request": request })
+
+
+### Non API call functions ###
+
+def get_new_file_id(database, debug = False):
+    '''Non locking database ID scan'''
+    # ids = np.array( database.keys() ) List version turn out to be faster on more then 1e4 id's
+    if not debug:
+        ids =  database.keys()
+        found_id = False
+        while not found_id:
+            new_id = random.randint(*id_range)
+            if not (new_id in ids):
+                found_id = True
+        return new_id
+    else:
+        return random.randint(*id_range)
+    
+
+async def save_file(file, saved_file_path):
     if save_in_chunkes:
         # Save file in chunks
         async with aiofiles.open(saved_file_path, 'wb') as saved_file:
@@ -129,47 +196,3 @@ async def create_upload_file(request: Request, file: UploadFile = File(...)) :
             content_of_file = await file.read()
             await saved_file.write(content_of_file)
     logging.info(f"File saved as: {saved_file_path}")
-    return {"id": id}
-    # return request.json()
-
-if debug_api_calls:
-    @app.get("/get-database/")
-    async def get_database():
-        logging.info(f'Database unload request request!')
-        return database
-
-# Static HTML
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-
-@app.get("/uploadform/", response_class=HTMLResponse)
-async def get_upload_form(request: Request):
-    return templates.TemplateResponse("upload_file.html", { "request": request })
-
-@app.get("/showid", response_class=HTMLResponse)
-async def get_upload_form(request: Request):
-    return templates.TemplateResponse("showid.html", { "request": request })
-
-
-### Non API call functions ###
-
-def get_new_file_id(database):
-    '''Non locking database ID scan'''
-    # ids = np.array( database.keys() ) List version turn out to be faster on more then 1e4 id's
-    ids =  database.keys()
-    found_id = False
-    while not found_id:
-        new_id = random.randint(*id_range)
-        if not (new_id in ids):
-            found_id = True
-    return new_id
-
-def add_file_to_database(id:int,filename):
-    if fake_database:
-        # global database
-        database[id] = { "hash" : datetime }
-    else:
-        #Add file to database for real
-        pass
-    
