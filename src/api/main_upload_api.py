@@ -25,10 +25,13 @@ import numpy as np
 # from typing import Callable
 
 if not fake_database:
-    # Database
-    import sqlalchemy as db
-    import sqlalchemy_utils as db_util
-    from sqlalchemy.orm import sessionmaker
+    # Database imports if used
+
+    # import sqlalchemy as db
+    # import sqlalchemy_utils as db_util
+    # from sqlalchemy.orm import sessionmaker
+
+    from database_tools import *
 
 #TODO
 # Temp measure for importing DB settings
@@ -126,7 +129,9 @@ templates = Jinja2Templates(directory="templates")
 async def read_item(request: Request, id: str):
     return templates.TemplateResponse("item.html", {"request": request, "id": id})
 
-
+@app.get("/uploadform/", response_class=HTMLResponse)
+async def get_upload_form():
+    return templates.TemplateResponse("upload_file.html", { "url" : Request.url._url })
 
 ### Non API call functions ###
 
