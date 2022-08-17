@@ -20,9 +20,9 @@ class FileForProcessing(Base):
     saved_timestamp = Column ( Integer, nullable=True )
     
 def __repr__(self):
-        return "<User(id='%d', filename='%s')>" % (
-                                self.id, self.filename)   
-
+        # return "<User(id='%d', filename='%s')>" % (
+        #                         self.id, self.filename)   
+        return f"File id={id} , filename={self.filename}"
 
 
 

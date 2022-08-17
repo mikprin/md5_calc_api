@@ -4,11 +4,11 @@ from settings import *
 
 from datetime import datetime
 
-from fastapi import FastAPI, File, UploadFile, Request # fastapi
+from fastapi import FastAPI, File, UploadFile, Request, Body # fastapi
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import logging,sys,os, pathlib # logging, system
+import logging,sys,os, pathlib, json # logging, system
 import aiofiles
 from threading import Thread
 from threading import Lock
@@ -60,9 +60,11 @@ if sys.version_info.minor < 10:
 
 # Create directory if needed:
 
-# mkdir static
+# mkdir working dirs if not exist
 
 os.makedirs(os.path.join(root_path,"static"), exist_ok=True)
+os.makedirs(filesystem_work_point, exist_ok=True)
+
 
 
 ### FastAPI ###
@@ -88,17 +90,29 @@ async def get_file(file_id: int ):
     # Check that hash exists in the database here
     return hash
 
+@app.get("/gethash/")
+async def get_file(file_id: int ):
+    ''' Get MD5 from the server back '''
+    hash = "12341234"
+    # Check that hash exists in the database here
+    return hash
+
 @app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...)) :
+async def create_upload_file(request: Request, file: UploadFile = File(...)) :
+    logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer!')
+    # print("++++++++++")
+    # json_formatted_str = json.dumps(request.json(), indent=2)
+    # print(json_formatted_str)
+    # print("++++++++++")
+    # if request.source
+
     # Save complete file in memory
     
     # Generate temp filename ( #TODO )
     id = get_new_file_id(database)
     filename = str(id)
     saved_file_path = os.path.join( filesystem_work_point , filename)
-    
-    
     
     # Simpler way
     # with open(saved_file_path, "wb") as buffer:
@@ -114,9 +128,9 @@ async def create_upload_file(file: UploadFile = File(...)) :
         async with aiofiles.open(saved_file_path, "wb") as saved_file:
             content_of_file = await file.read()
             await saved_file.write(content_of_file)
-    
     logging.info(f"File saved as: {saved_file_path}")
     return {"id": id}
+    # return request.json()
 
 if debug_api_calls:
     @app.get("/get-database/")
@@ -125,16 +139,18 @@ if debug_api_calls:
         return database
 
 # Static HTML
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-
-# @app.get("/items/{id}", response_class=HTMLResponse)
-# async def read_item(request: Request, id: str):
-#     return templates.TemplateResponse("item.html", {"request": request, "id": id})
 
 @app.get("/uploadform/", response_class=HTMLResponse)
 async def get_upload_form(request: Request):
     return templates.TemplateResponse("upload_file.html", { "request": request })
+
+@app.get("/showid", response_class=HTMLResponse)
+async def get_upload_form(request: Request):
+    return templates.TemplateResponse("showid.html", { "request": request })
+
 
 ### Non API call functions ###
 

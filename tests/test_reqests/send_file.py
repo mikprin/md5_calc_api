@@ -17,7 +17,8 @@ def send_file(test_file_path):
     # test_file = open("test_file", "rb")
     with open(test_file_path) as test_file:
         # test_response = requests.post(test_url, data={'filename': test_file , "msg":"hello" ,"type" : "multipart/form-data"}, files = { "file" : test_file  } )
-        test_response = requests.post(test_url, data={'filename': test_file_name , "msg":"hello" ,"type" : "multipart/form-data"}, files = { "file" : test_file} )
+        test_response = requests.post(test_url, data={
+            'filename': test_file_name , "msg":"hello" ,"type" : "multipart/form-data"}, files = { "file" : test_file} )
 
     # test_response = requests.post(test_url, files = {"form_field_name": test_file})
 

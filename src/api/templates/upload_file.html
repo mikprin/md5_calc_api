@@ -13,6 +13,11 @@
     label, button {
       font-size: 16px;
       cursor: pointer;
+      
+    }
+    form {
+      margin-top: 40px;
+      margin-bottom: 40px;
     }
 
     input, textarea {
@@ -39,19 +44,25 @@
 </head>
 <body>
   <form action="/uploadfile" method="POST" enctype="multipart/form-data">
-    <label for="email">Email Address</label>
-    <input type="email" id="email" name="email">
 
-    <label for="fullName">Full Name</label>
-    <input type="text" id="fullName" name="fullName">
-
-    <label for="message">Message</label>
-    <textarea name="message" id="message"></textarea>
-
-    <label for="photo">Photo</label>
-    <input type="file" id="photo" name="photo">
+    <label for="file">File to upload the API</label>
+    <input type="file" id="file" name="file">
+    
+    <input name="request_source" type="hidden" id="request" value="HTML">
 
     <button type="submit">Submit</button>
+
+    <output name="output_id" for="output_id"></output>
   </form>
+
+ <form action="/gethash" method="GET" >
+  <label for="file_id">ID of the file</label>
+  <input type="number" id="file_id" name="file_id">
+
+
+  <button type="submit">Get hash!</button>
+ </form>
+
+
 </body>
 </html>
