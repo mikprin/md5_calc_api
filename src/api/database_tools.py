@@ -2,8 +2,9 @@
 import sqlalchemy as db
 import sqlalchemy_utils as db_util
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Base, Column, Date, Enum, BigInteger, Integer
-
+from sqlalchemy import Column, Date, Enum, BigInteger, Integer, String
+from sqlalchemy.orm import declarative_base, relationship
+Base = declarative_base()
 
 
 

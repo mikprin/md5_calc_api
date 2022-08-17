@@ -8,48 +8,14 @@ from fastapi import FastAPI, File, UploadFile, Request # fastapi
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import logging,sys,os # logging, system
+import logging,sys,os, pathlib # logging, system
 import aiofiles
 from threading import Thread
 from threading import Lock
 import random
 import numpy as np
 
-# from dataclasses import dataclass
-# from re import I
-
-# For quck file copy?
-# import shutil
-# from pathlib import Path
-# from tempfile import NamedTemporaryFile
-# from typing import Callable
-
-if not fake_database:
-    # Database imports if used
-
-    # import sqlalchemy as db
-    # import sqlalchemy_utils as db_util
-    # from sqlalchemy.orm import sessionmaker
-
-    from database_tools import *
-
-#TODO
-# Temp measure for importing DB settings
-postgres_credentials = {
-    "pguser" : 'postgres',
-    "pgpassword" : "example",
-    'pghost' : "localhost",
-    'pgport' : 5432,
-    'pgdb' : 'postgres',
-}
-
-
-# Check some additional imports for python < 3.10
-if sys.version_info.minor < 10:
-    from typing import Union
-
-
-### Logging ###
+### Logging setup ###
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -59,14 +25,51 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
 
+logging.info("Main script started")
+# root_path = os.path.realpath(__file__)
+root_path = pathlib.Path(__file__).parent.resolve()
+current_dir = pathlib.Path().resolve()
+logging.info(f"Working dir: {current_dir}")
+
+
+# There are two options for database: real one and a temp one in memory
+if not fake_database:
+    # Database imports if used
+    logging.info("Using real database. Trying to connect")
+    # import sqlalchemy as db
+    # import sqlalchemy_utils as db_util
+    # from sqlalchemy.orm import sessionmaker
+    from database_tools import *
+    
+    ### Initiage database (using database tools) ###
+    try:
+        database_sesstion,database_engine = get_session(postgres_credentials)
+    except:
+        logging.error("""Failed to open database. Terminating. Possible solutions are:
+                      check database container is running, check credentials (password and user).
+                      Also it is possible to set `fake_database = True` as a config variable to use temperary database in memory""")
+        pass
+
+#TODO
+# Temp measure for importing DB settings
+
+
+# Check some additional imports for python < 3.10
+if sys.version_info.minor < 10:
+    from typing import Union
+
+# Create directory if needed:
+
+# mkdir static
+
+os.makedirs(os.path.join(root_path,"static"), exist_ok=True)
 
 
 ### FastAPI ###
 
-# print("app started")
-logging.info("Main script started")
 app = FastAPI()
 
+# Temp database created
 database = {
     1 : {"hash": 1},
     2 : { "hash" : 2 }     
@@ -125,13 +128,13 @@ if debug_api_calls:
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/items/{id}", response_class=HTMLResponse)
-async def read_item(request: Request, id: str):
-    return templates.TemplateResponse("item.html", {"request": request, "id": id})
+# @app.get("/items/{id}", response_class=HTMLResponse)
+# async def read_item(request: Request, id: str):
+#     return templates.TemplateResponse("item.html", {"request": request, "id": id})
 
 @app.get("/uploadform/", response_class=HTMLResponse)
-async def get_upload_form():
-    return templates.TemplateResponse("upload_file.html", { "url" : Request.url._url })
+async def get_upload_form(request: Request):
+    return templates.TemplateResponse("upload_file.html", { "request": request })
 
 ### Non API call functions ###
 
