@@ -10,11 +10,13 @@ services:
   
   rabbitmq:
     image: rabbitmq
+    restart: always
     ports:
       - "5672:5672"
 
   redis:
     image: redis
+    restart: always
     ports:
       - "6379:6379"
       
