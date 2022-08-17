@@ -1,5 +1,6 @@
 # Database
 import sqlalchemy as db
+import time
 import sqlalchemy_utils as db_util
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Date, Enum, BigInteger, Integer, String
@@ -26,7 +27,10 @@ def __repr__(self):
 
 
 
+def add_file_to_database(id,path):
+    timestamp = int(time.time())
 
+    
 
 
 
