@@ -4,9 +4,9 @@ cd $DIR
 
 mkdir appdata
 
-# API
-# docker stop upload_api_inst
-# docker rm upload_api_inst
+# Generate ENV:
+
+cp "$DIR/env_example" "$DIR/.env"
 
 
 docker-compose up -d
