@@ -5,14 +5,15 @@
 ### Folder structure
 
     .
-    ├── build                   # Compiled files
     ├── docs                    # Documentation and task files
-    ├── api                     # Source files for API. Including docker build scripts
+    ├── src                     # Source files for API and celery workers. 
     ├── celery                  # 
     ├── docker                  # Docker config files for external pre build modules (postgres etc) 
     ├── tests                   # Automated and not so automated tests
-    ├── tools                   # Tools and utilities
     ├── autoinstall.sh          # Smart install script for linux
+    ├── docker-compose.yml      #  Docker compose file for deploying and building containers
+    ├── .env                    #  Important file with enviormental variables. autoinstall script can generate it.
+    ├── Dockerfile
     ├── LICENSE
     └── README.md
 
