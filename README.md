@@ -1,5 +1,5 @@
 # Overview
-
+![Overview of the system](./doc/MD5_API_schematic_diagram.png)
 
 
 ### Folder structure
