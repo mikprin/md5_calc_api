@@ -15,7 +15,7 @@ You are free to use api docs `host:8000/docs` to check all by yourself. Or you c
 
 ### Folder structure
 
-    .
+    md5_calc_api
     ├── docs                    # Documentation and task files
     ├── src                     # Source files for API and celery workers. 
     ├── celery                  # 
@@ -53,12 +53,12 @@ docker-compose up -d --build`
 Main python sources folder. Here are all code including API and celery workers.
 
 
-src
-├── celery_worker.py # Code for celery
-├── database_tools.py # Tools for SQLAlchemy to create database
-├── main_upload_api.py # API code with requests
-├── settings.py # Code to import `.env` variables
-└── templates # HTML templates for the application
+    src
+    ├── celery_worker.py # Code for celery
+    ├── database_tools.py # Tools for SQLAlchemy to create database
+    ├── main_upload_api.py # API code with requests
+    ├── settings.py # Code to import `.env` variables
+    └── templates # HTML templates for the application
 
 ## Tests folder
 Tests folder consists of set of tests for the API goal. `simple_test.py` provides low load test to enshure code is working correctly. Organized as unit test. However, giving what this API should proof I created `load_test.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
