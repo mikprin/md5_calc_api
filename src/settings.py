@@ -1,8 +1,17 @@
 ### Settings ###
 
+# Import settings from env.
+import os
+from dotenv import load_dotenv
+
+
+env_folder = "../.env"
+load_dotenv(env_folder)  # take environment variables from .env.
+
 # spurce_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 filesystem_work_point = "../appdata"
+logdir = "../logs"
 
 save_in_chunkes = False
 chunk_size = 2048
@@ -10,26 +19,18 @@ chunk_size = 2048
 debug_api_calls = True
 
 fake_database = False
-
 # Id range of int values
-id_range = (1,int(1e1))
 
 docker_deploy = True
 
-# Database credentials
-if docker_deploy:
+try:
+    # celery_filesystem_worker_timeout = int(os.getenv("CELERY_WORKER_FILESYSTEM_TIMEOUT"))
     postgres_credentials = {
-        "pguser" : 'postgres',
-        "pgpassword" : "example",
-        'pghost' : "host.docker.internal",
-        'pgport' : 5432,
-        'pgdb' : 'md5hashes',
+        "pguser" : os.getenv("DB_USER"),
+        "pgpassword" : os.getenv("DB_PASSWORD"),
+        'pghost' : os.getenv("DB_HOST"),
+        'pgport' : int(os.getenv("DB_PORT")),
+        'pgdb' : os.getenv("DB_NAME")  
     }
-else:
-    postgres_credentials = {
-        "pguser" : 'postgres',
-        "pgpassword" : "example",
-        'pghost' : "localhost",
-        'pgport' : 5432,
-        'pgdb' : 'md5hashes',
-    }
+except Exception as e:
+    print(f"!!!Configuration error: {e}")

@@ -1,4 +1,5 @@
 # Import config settings
+import os
 from settings import *
 
 
@@ -14,6 +15,8 @@ from threading import Thread
 from threading import Lock
 import random
 import numpy as np
+
+from celery_worker import  md5sum
 
 ### Logging setup ###
 
@@ -111,16 +114,8 @@ async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
     # Generate temp filename ( #TODO )
     id = database.get_new_id()
     filename = str(id)
-    
-    if database.add_file_to_quene(id, filename):
-        saved_file_path = os.path.join( filesystem_work_point , filename)
-        await save_file(file,saved_file_path)
-        return {"id": id, "status": "success"}
-        
-    else:
-        return {"id": None, "status": "fail"}
-
-    
+    result = await save_and_start_hashing(file,database) # LAUNCHING WORKER HERE
+    return result
 
 
 
@@ -129,13 +124,11 @@ async def create_upload_file(request: Request, source: str = "api" ,  file: Uplo
     ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
     logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer from HTML page!')
-    id = database.get_new_id()
-    filename = str(id)
-    if database.add_file_to_quene(id, filename):
-        saved_file_path = os.path.join( filesystem_work_point , filename)
-        await save_file(file,saved_file_path)
-    return templates.TemplateResponse("return_id.html", { "request": request , "id": id })
-
+    result = await save_and_start_hashing(file,database)
+    if result["success"]:
+        return templates.TemplateResponse("return_id.html", { "request": request , "id": result["id"] })
+    else:
+        return templates.TemplateResponse("return_id.html", { "request": request , "id": "FAILED" })
 
 if debug_api_calls:
     @app.get("/get-database/")
@@ -173,21 +166,24 @@ async def get_upload_form(request: Request):
 
 ### Non API call functions ###
 
-# def get_new_file_id(database, debug = False):
-#     '''Non locking database ID scan'''
-#     # ids = np.array( database.keys() ) List version turn out to be faster on more then 1e4 id's
-#     if not debug:
-#         ids =  database.keys()
-#         found_id = False
-#         while not found_id:
-#             new_id = random.randint(*id_range)
-#             if not (new_id in ids):
-#                 found_id = True
-#         return new_id
-#     else:
-#         return random.randint(*id_range)
-    
 
+
+
+async def save_and_start_hashing(file, database):
+    id = database.get_new_id()
+    filename = str(id)
+    if database.add_file_to_quene(id, filename):
+        saved_file_path = os.path.join( filesystem_work_point , filename)
+        await save_file(file,saved_file_path)
+        worker = md5sum.delay(filename)
+        database.add_worker_id(id,worker.id)
+        return{ "success" : True , "id" : id, "celery_status" : worker.status, "celery_id" : worker.id }
+    else:
+        logger.error("Failed to add {id} to database")
+        return {"id": None, "success": False , "id" : None, "celery_status" : None, "celery_id" : None }
+
+
+        
 async def save_file(file, saved_file_path):
     if save_in_chunkes:
         # Save file in chunks

@@ -9,3 +9,6 @@ requests
 psycopg2
 jinja2
 numpy
+python-dotenv
+redis
+flower

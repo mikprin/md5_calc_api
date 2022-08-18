@@ -16,6 +16,7 @@ from settings import *
 
 def get_postgres_engine(user,password,host,port, pgdb,debug=False):
     url = f"postgresql://{user}:{password}@{host}:{port}/{pgdb}"
+    logging.info(f"Connecting to `{url}` database")
     if not db_util.database_exists(url):
         db_util.create_database(url)
         logging.info(f"No database found, database created")
@@ -43,7 +44,7 @@ class FileForProcessing(Base):
     id = Column(Integer,primary_key=True,autoincrement=False)
     filename = Column( String )
     md5_hash = Column(String , nullable=True)
-    worker_id = Column( Integer, nullable=True )
+    worker_id = Column( String, nullable=True )
     saved_timestamp = Column ( Integer, nullable=True )
     
 def __repr__(self):
@@ -62,16 +63,7 @@ class API_database( ):
         database_record = FileForProcessing(id=id, filename=filename, saved_timestamp = time.time())
         self.session.add( database_record )
         #TODO cach exeptions here
-        try:
-            self.session.commit()
-            logging.info(f'Sucsessfully added file {id} to database.')
-            return 1
-        except Exception as error:
-            logging.error(f"FAILED TO ADD COMMIT TO DATABASE")
-            logging.error(f"Error message: {error}")
-            self.session.rollback()
-            logging.info(f"Database rollback")
-            return 0
+        return self.commit_database(id)
         
     def get_new_id(self):
         ids =  self.get_all_ids()
@@ -84,11 +76,27 @@ class API_database( ):
             else: new_id = 1
         return new_id
 
+    def add_worker_id(self,id,worker_id):
+        self.session.query(FileForProcessing).filter(FileForProcessing.id == id).update({'worker_id': worker_id})
+        return self.commit_database(id)
+
     def get_all_ids(self):
         ids = self.session.query(FileForProcessing.id).all()
         ids_list = [i[0] for i in ids]
         return ids_list
-        
+    
+    def commit_database(self, id = None):
+        try:
+            self.session.commit()
+            logging.info(f'Sucsessfully commited record {id}.')
+            return 1
+        except Exception as error:
+            logging.error(f"FAILED TO ADD COMMIT TO DATABASE when working with {id}")
+            logging.error(f"Error message: {error}")
+            self.session.rollback()
+            logging.info(f"Database rollback")
+            return 0
+    
     def drop_all_files(self):
         # FileForProcessing.__table__.drop(self.engine) # NOT WORKING COORECTLY!
         for id in self.get_all_ids():
