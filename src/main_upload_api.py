@@ -37,11 +37,8 @@ logging.info(f"Working dir: {current_dir}")
 
 # There are two options for database: real one and a temp one in memory
 
-# Database imports if used
-logging.info("Using real database. Trying to connect")
-# import sqlalchemy as db
-# import sqlalchemy_utils as db_util
-# from sqlalchemy.orm import sessionmaker
+
+logging.info("Using postgres database. Trying to connect")
 from database_tools import *
 
 ### Initiage database (using database tools) ###
@@ -54,18 +51,11 @@ except:
                 """)
     sys.exit("Database connection error.")
 database = API_database(database_sesstion,database_engine)
-    
-#TODO
-# Temp measure for importing DB settings
 
-
-# Check some additional imports for python < 3.10
-if sys.version_info.minor < 10:
-    from typing import Union
 
 # Create directory if needed:
-os.makedirs(os.path.join(root_path,"static"), exist_ok=True)
-os.makedirs(filesystem_work_point, exist_ok=True)
+os.makedirs(os.path.join(root_path,"static"), exist_ok=True) # For static HTML after templating
+os.makedirs(filesystem_work_point, exist_ok=True) # Where files saved in container
 
 
 
@@ -76,6 +66,7 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
+    ''' Root welcome JSON '''
     # print("LOG LOG LOG")
     logging.info(f'Got root request!')
     return {"message": "Welcome you on my BG task submission API"}
@@ -125,8 +116,9 @@ if debug_api_calls:
     @app.get("/get-database/")
     async def get_database():
         '''Debug call to return the database. Debug methods can be turned off with debug_api_calls = False'''
-        logging.info(f'Database unload request request!')
-        return database #TODO return database here
+        logging.info(f'Database unload request!')
+        #TODO return database here
+        return "Your database will be here!"
     
     @app.post("/cleardatabase/")
     async def clear_database():
