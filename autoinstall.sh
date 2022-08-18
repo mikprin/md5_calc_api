@@ -8,5 +8,4 @@ mkdir appdata
 
 cp "$DIR/env_example" "$DIR/.env"
 
-
 docker-compose up -d
