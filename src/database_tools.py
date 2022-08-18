@@ -105,23 +105,31 @@ class API_database( ):
 
     def get_hashing_results(self, id):
         """Get hash results of request file id"""
+        logging.debug(f"Looking for worker for element {id}")
         worker_id = self.session.query(FileForProcessing).get(id).worker_id
+        logging.debug(f"Worker for  `{id}` found: {worker_id}")
+        # TODO case where worker_id non existent
         # [0] - id 
         # [1] - tasl_id
         # [2] - status
         # [3] - result
         # [4] - date_done
-        worker_id = self.session.query(FileForProcessing).get(id).worker_id
         with self.engine.connect() as conn:
+            logging.debug(f"Connecting with q: select * from celery_taskmeta")
             result = conn.execute("select * from celery_taskmeta")
             for row in result:
+                # logging.debug(f"{row}")
                 if row[1] == worker_id:
                     if row[2] == "SUCCESS":
-                        return { "status" : row[2] , "hash" : pickle.loads(row[3]) }
+                        hash = pickle.loads(row[3])
+                        logging.debug(f"Status {row[2]} for element {id} with hash {hash}")
+                        return { "status" : row[2] , "hash" : hash }
                     else:
+                        logging.debug(f"Status {row[2]} for element {id}")
                         return { "status" : row[2] , "hash" : None }
-                    break
-                
+            logging.error(f"Unable to find id = {id} in working database. :-(")
+        logging.error(f"Seems like search went wrong")
+        return { "status" : "FIND_WORKER_ERROR" , "hash" : None }
     
     def drop_all_files(self):
         """Delete database table. Cruel."""

@@ -21,9 +21,9 @@ from celery_worker import  md5sum
 ### Logging setup ###
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 log_handler = logging.StreamHandler(sys.stdout)
-log_handler.setLevel(logging.INFO)
+log_handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
@@ -83,15 +83,21 @@ async def root():
 @app.get("/gethash/")
 async def get_file_hash(file_id: int ):
     ''' Get MD5 from the server back '''
-    result = get_hash_from_database(file_id, database)
+    logging.info(f"Getting hash for {file_id}")
+    print(f"Getting hash for {file_id}")
+    result = await get_hash_from_database(file_id, database)
+    # result = 1
     # Check that hash exists in the database here
     return result
 
 @app.get("/gethash/{file_id}")
 async def get_file_hash_from_url(file_id: int ):
     ''' Get MD5 from the server back but pass URL as ID '''
-    result = get_hash_from_database(file_id, database)
+    logging.info(f"Getting hash for {file_id}")
+    print(f"Getting hash for {file_id}")
+    result = await get_hash_from_database(file_id, database)
     # Check that hash exists in the database here
+    # result = 1
     return result
 
 @app.post("/uploadfile/")
@@ -99,16 +105,13 @@ async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
     ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
     logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer!')
-
-    # Save complete file in memory
-    # Generate temp filename ( #TODO )
     id = database.get_new_id()
     filename = str(id)
     result = await save_and_start_hashing(file,database) # LAUNCHING WORKER HERE
     return result
 
 @app.post("/uploadfile-html/")
-async def create_upload_file(request: Request, source: str = "api" ,  file: UploadFile = File(...)) :
+async def create_upload_file_html(request: Request, source: str = "api" ,  file: UploadFile = File(...)) :
     ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
     logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer from HTML page!')
@@ -179,9 +182,13 @@ async def save_file(file, saved_file_path):
             await saved_file.write(content_of_file)
     logging.info(f"File saved as: {saved_file_path}")
     
-def get_hash_from_database(file_id,database):
+async def get_hash_from_database(file_id,database):
+    logging.debug("in get_hash_from_database method")
     try:
+        logging.debug("in get_hash_from_database method TRY")
         result = database.get_hashing_results(file_id)
+        return result
     except Exception as err:
-        logging.error(f"When database.get_hashing_results error: with database. Error description: {e}")
+        logging.error(f"When database.get_hashing_results error: with database. Error description: {err}")
         result = { "status" : "DATABASE_FAIL" , "hash" : None }
+        return result
