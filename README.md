@@ -44,6 +44,13 @@ cd $DIR
 docker-compose up -d --build`
 
 
+## Dependencies
+### Linux (any)
+Docker (for container managment). You can read about installing docker here: https://docs.docker.com/engine/install/
+### Ubuntu
+postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygwin/Babun.). For SQLAlchemy to work.
+
+
 
 
 # Source structure
@@ -63,15 +70,6 @@ Main python sources folder. Here are all code including API and celery workers.
 ## Tests folder
 Tests folder consists of set of tests for the API goal. `simple_test.py` provides low load test to enshure code is working correctly. Organized as unit test. However, giving what this API should proof I created `load_test.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
 
-# Build and deployment
-## Dependencies
-
-Docker (for container managment). You can read about installing docker here: https://docs.docker.com/engine/install/
-
-
-### Ubuntu
-postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygwin/Babun.). For SQLAlchemy to work.
-
 
 
 # Testing
@@ -84,5 +82,5 @@ postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygw
 
 # TODO
 
-`mkdir logs` Folder for logging. Can be altered in docker-compose.yml
+* `mkdir logs` Folder for logging. Can be altered in docker-compose.yml
 * Connection between celery worker results in Postgress and task ID for API database are not related. That ban be fixed easily to enable quicker result search time. However I'm afraid I don't have time to do it right now.

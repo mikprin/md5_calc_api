@@ -60,12 +60,14 @@ class API_database( ):
         self.session = database_sesstion
 
     def add_file_to_quene(self,id, filename):
+        """Create new file object in database"""
         database_record = FileForProcessing(id=id, filename=filename, saved_timestamp = time.time())
         self.session.add( database_record )
         #TODO cach exeptions here
         return self.commit_database(id)
         
     def get_new_id(self):
+        """Invent new ID"""
         ids =  self.get_all_ids()
         ids.sort()
         try:
@@ -77,15 +79,18 @@ class API_database( ):
         return new_id
 
     def add_worker_id(self,id,worker_id):
+        """add celery task ID to quene database table"""
         self.session.query(FileForProcessing).filter(FileForProcessing.id == id).update({'worker_id': worker_id})
         return self.commit_database(id)
 
     def get_all_ids(self):
+        """Get all ids from quene table"""
         ids = self.session.query(FileForProcessing.id).all()
         ids_list = [i[0] for i in ids]
         return ids_list
     
     def commit_database(self, id = None):
+        """Cearfully commit to database. No sudden moves."""
         try:
             self.session.commit()
             logging.info(f'Sucsessfully commited record {id}.')
@@ -96,8 +101,14 @@ class API_database( ):
             self.session.rollback()
             logging.info(f"Database rollback")
             return 0
+
+    def get_hashing_results(self, id):
+        """Get hash results of request file id"""
+        self.session.query(FileForProcessing).filter(FileForProcessing.id == id)
+        pass
     
     def drop_all_files(self):
+        """Delete database table. Cruel."""
         # FileForProcessing.__table__.drop(self.engine) # NOT WORKING COORECTLY!
         for id in self.get_all_ids():
             self.session.query(FileForProcessing).filter(FileForProcessing.id==id).delete()
