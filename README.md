@@ -1,5 +1,5 @@
 # Overview
-![Overview of the system]([http://url/to/img.png](https://github.com/mikprin/md5_calc_api/blob/master/doc/MD5_API_schematic_diagram.png))
+![Overview of the system](./doc/MD5_API_schematic_diagram.png)
 
 
 ### Folder structure
