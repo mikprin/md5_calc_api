@@ -2,6 +2,8 @@ true_localhost=localhost
 docker_localhost="host.docker.internal"
 localhost_var=${docker_localhost}
 
+SYSTEM_LOG_DIR_PATH=logs
+
 DB_HOST=${localhost_var}
 DB_PORT=5432
 DB_USER=postgres
