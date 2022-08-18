@@ -2,16 +2,11 @@
 DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 cd $DIR
 
-
-# Postgress
-
-cd "$DIR/docker/postgress"
-docker compose up -d
-
+mkdir app_data
 
 # API
-docker stop upload_api_inst
-docker rm upload_api_inst
+# docker stop upload_api_inst
+# docker rm upload_api_inst
 
 docker build -t upload_api .
 

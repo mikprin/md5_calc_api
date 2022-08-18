@@ -2,7 +2,7 @@
 
 # spurce_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
-filesystem_work_point = "./saved_files"
+filesystem_work_point = "../appdata"
 
 save_in_chunkes = False
 chunk_size = 2048

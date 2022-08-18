@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: postgresql_database
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+  
+  rabbitmq:
+    container_name: rabbitmq_inst
+    image: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+
+  # redis:
+  #   image: redis
+  #   restart: always
+  #   ports:
+  #     - "6379:6379"
+      
+  upload_api:
+    container_name: upload_api_inst
+    build: .
+    restart: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ./appdata:/api/appdata
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
