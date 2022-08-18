@@ -1,7 +1,7 @@
 # Database
 from hashlib import new
 import sqlalchemy as db
-import time, random
+import time, random, pickle
 import logging
 import sqlalchemy_utils as db_util
 from sqlalchemy.orm import sessionmaker
@@ -15,6 +15,7 @@ from settings import *
 ## Connect to database (init of SQLAlchemy) ##
 
 def get_postgres_engine(user,password,host,port, pgdb,debug=False):
+    """postgres session init"""
     url = f"postgresql://{user}:{password}@{host}:{port}/{pgdb}"
     logging.info(f"Connecting to `{url}` database")
     if not db_util.database_exists(url):
@@ -24,22 +25,24 @@ def get_postgres_engine(user,password,host,port, pgdb,debug=False):
     logging.info(f"connected to database {engine.url}")
     return engine
 
-def get_session(postgres_credentials):
+def get_session(postgres_credentials, debug=False):
+    """postgres session init"""
     engine = get_postgres_engine(
         postgres_credentials['pguser'],
         postgres_credentials['pgpassword'],
         postgres_credentials['pghost'],
         postgres_credentials['pgport'],
-        postgres_credentials['pgdb']
+        postgres_credentials['pgdb'],
+        debug=debug
     )
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)()
-    
     return session,engine
 
 # Classes for database tables
 
 class FileForProcessing(Base):
+    """API file quene class. Creates and works with `files_quene`"""
     __tablename__ = "files_quene"
     id = Column(Integer,primary_key=True,autoincrement=False)
     filename = Column( String )
@@ -47,10 +50,8 @@ class FileForProcessing(Base):
     worker_id = Column( String, nullable=True )
     saved_timestamp = Column ( Integer, nullable=True )
     
-def __repr__(self):
-        # return "<User(id='%d', filename='%s')>" % (
-        #                         self.id, self.filename)   
-        return f"File id={self.id} , filename={self.filename}"
+    def __repr__(self):
+            return f"File id={self.id} , filename={self.filename}"
 
 
 class API_database( ):
@@ -104,8 +105,23 @@ class API_database( ):
 
     def get_hashing_results(self, id):
         """Get hash results of request file id"""
-        self.session.query(FileForProcessing).filter(FileForProcessing.id == id)
-        pass
+        worker_id = self.session.query(FileForProcessing).get(id).worker_id
+        # [0] - id 
+        # [1] - tasl_id
+        # [2] - status
+        # [3] - result
+        # [4] - date_done
+        worker_id = self.session.query(FileForProcessing).get(id).worker_id
+        with self.engine.connect() as conn:
+            result = conn.execute("select * from celery_taskmeta")
+            for row in result:
+                if row[1] == worker_id:
+                    if row[2] == "SUCCESS":
+                        return { "status" : row[2] , "hash" : pickle.loads(row[3]) }
+                    else:
+                        return { "status" : row[2] , "hash" : None }
+                    break
+                
     
     def drop_all_files(self):
         """Delete database table. Cruel."""
@@ -116,8 +132,6 @@ class API_database( ):
             # self.session.delete(file_to_delete)
         self.session.commit()
 
-# def add_file_to_database(id,path):
-#     timestamp = int(time.time())
 
 
 
