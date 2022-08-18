@@ -9,4 +9,5 @@ mkdir logs
 
 cp "$DIR/env_example" "$DIR/.env"
 
-docker-compose up -d
+cd $DIR
+docker-compose up -d --build
