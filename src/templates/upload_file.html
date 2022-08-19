@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Form</title>
+  <title>File upload form</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
   <style>
     body {
@@ -18,6 +18,14 @@
     form {
       margin-top: 40px;
       margin-bottom: 40px;
+    }
+    img {
+      justify-content: center;
+      display: grid;
+      grid-row-gap: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     input, textarea {
@@ -43,6 +51,7 @@
   </style>
 </head>
 <body>
+  <img src="https://websalutem.com/wp-content/uploads/md5_checksum.jpg" alt="" style="width:300px; justify-content: center;" class="center">
   <form action="/uploadfile-html" method="POST" enctype="multipart/form-data">
 
     <label for="file">File to upload the API</label>
@@ -54,13 +63,11 @@
     <output name="output_id" for="output_id"></output>
   </form>
 
- <form action="/gethash" method="GET" >
-  <label for="file_id">ID of the file</label>
-  <input type="number" id="file_id" name="file_id">
-
-
-  <button type="submit">Get hash!</button>
- </form>
+  <form action="/gethash-form/" method="GET" >
+    <label for="file_id">ID of the file</label>
+    <input type="number" id="file_id" name="file_id">
+    <button type="submit">Get hash!</button>
+  </form>
 
 
 </body>

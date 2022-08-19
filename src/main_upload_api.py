@@ -62,7 +62,10 @@ os.makedirs(filesystem_work_point, exist_ok=True) # Where files saved in contain
 ### FastAPI ###
 
 app = FastAPI()
+# Static HTML
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 async def root():
@@ -73,7 +76,7 @@ async def root():
 
 @app.get("/gethash/")
 async def get_file_hash(file_id: int ):
-    ''' Get MD5 from the server back '''
+    ''' Get MD5 from the server back. fild ID as input hash as output. '''
     logging.info(f"Getting hash for {file_id}")
     print(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
@@ -110,7 +113,7 @@ async def create_upload_file_html(request: Request, source: str = "api" ,  file:
     if result["success"]:
         return templates.TemplateResponse("return_id.html", { "request": request , "id": result["id"] })
     else:
-        return templates.TemplateResponse("return_id.html", { "request": request , "id": "FAILED" })
+        return templates.TemplateResponse("return_error.html", { "request": request , "id": "FAILED" })
 
 if debug_api_calls:
     @app.get("/get-database/")
@@ -131,11 +134,11 @@ if debug_api_calls:
             os.remove(f)
         return { "status" : "success" }
 
+    @app.get("/error/")
+    async def return_error_html(request: Request):
+        '''Debug call to get to error page'''
+        return templates.TemplateResponse("return_error.html", { "request": request })
 
-# Static HTML
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
 
 @app.get("/uploadform/", response_class=HTMLResponse)
 async def get_upload_form(request: Request):

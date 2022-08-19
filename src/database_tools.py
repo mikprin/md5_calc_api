@@ -15,7 +15,7 @@ from settings import *
 ## Connect to database (init of SQLAlchemy) ##
 
 def get_postgres_engine(user,password,host,port, pgdb,debug=False):
-    """postgres session init"""
+    """Postgres session init"""
     url = f"postgresql://{user}:{password}@{host}:{port}/{pgdb}"
     logging.info(f"Connecting to `{url}` database")
     if not db_util.database_exists(url):
@@ -26,7 +26,7 @@ def get_postgres_engine(user,password,host,port, pgdb,debug=False):
     return engine
 
 def get_session(postgres_credentials, debug=False):
-    """postgres session init"""
+    """Postgres session init"""
     engine = get_postgres_engine(
         postgres_credentials['pguser'],
         postgres_credentials['pgpassword'],
@@ -125,10 +125,10 @@ class API_database( ):
                         logging.debug(f"Status {row[2]} for element {id} with hash {hash}")
                         return { "status" : row[2] , "hash" : hash }
                     else:
-                        logging.debug(f"Status {row[2]} for element {id}")
+                        logging.info(f"Status {row[2]} for element {id}")
                         return { "status" : row[2] , "hash" : None }
             logging.error(f"Unable to find id = {id} in working database. :-(")
-        logging.error(f"Seems like search went wrong")
+        logging.error(f"Seems like search in database went wrong. Worker should be there! But it's not.")
         return { "status" : "FIND_WORKER_ERROR" , "hash" : None }
     
     def drop_all_files(self):
