@@ -1,20 +1,16 @@
 # Overview
+This is an API develop as a part of Bostongene onboarding contest. Goal was to create a distributed system to send file to API and get hash calculated on the backend with help of celery.
+
 ![Overview of the system](./doc/MD5_API_schematic_diagram.png)
 
-
 # Usage (API reference):
-
+You are free to use API docs `host:8000/docs` to check all by yourself. Or you can use request python scripts to quickly generate the POST requests. Or use them as reference. My text explanation is below:
 ### To send file
 Client (browser or another host) can send HTTP post request containing file. In return, he will get JSON in the form of:
 `{ "success" : True/False , "id" : id/None, "celery_status" : status/None , "celery_id" : celery_task_id/none }`
 None values correspond to `"success" : False` case.
-
-You are free to use API docs `host:8000/docs` to check all by yourself. Or you can use request python scripts to quickly generate the POST requests.
-
-
 ### To get hash
-
-To get hash, you can use `host:8000/get_hash/{id}` or send ID as request variable: `http://localhost:8000/gethash/?file_id=1`. In return, you get JSON in a form of `{ "status" : status(str) , "hash" : hash(str) }`. In case task is not finished, status will be `'PENDING'`. In case of invalid `id` it should be `"status":'INVALID_ID'`
+To get hash, you can use `host:8000/get_hash/{id}` or send ID as request variable: `http://localhost:8000/gethash/?file_id=1`. In return, you get JSON in a form of `{ "status" : status(str) , "hash" : hash(str) }`. In case task is not finished, status will be `'PENDING'`. In case of invalid `id` it should be `"status":'INVALID_ID'`.
 ### Folder structure
 
     md5_calc_api
@@ -30,7 +26,6 @@ To get hash, you can use `host:8000/get_hash/{id}` or send ID as request variabl
     ├── Dockerfile
     ├── LICENSE
     └── README.md
-
 
 # Deployment
 ## Automated
@@ -82,12 +77,14 @@ Tests folder consists of a set of tests for the API goal. `simple_test.py` provi
 * No security to work in open network. No authorization mechanism.
 * File reception of API are limited by filesystem which is common across all the system.
 * Not tested in distributed setup
+* IDs are not secure numbers. But can be easily made so by using celery worker ID as ID.
 
 # TODO
 
 * `mkdir logs` Folder for logging. Can be altered in docker-compose.yml
 * Connection between celery worker results in Postgress and task ID for API database are not related. That ban be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
 * Proper catch for out of range ID requests
+* Better querys for SQL
 
 # Other
 * Full task by task log of development was also posted in my telegram: https://t.me/ee_craft

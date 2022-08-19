@@ -106,30 +106,28 @@ class API_database( ):
     def get_hashing_results(self, id):
         """Get hash results of request file id"""
         logging.debug(f"Looking for worker for element {id}")
-        worker_id = self.session.query(FileForProcessing).get(id).worker_id
-        logging.debug(f"Worker for  `{id}` found: {worker_id}")
-        # TODO case where worker_id non existent
-        # [0] - id 
-        # [1] - tasl_id
-        # [2] - status
-        # [3] - result
-        # [4] - date_done
         with self.engine.connect() as conn:
-            logging.debug(f"Connecting with q: select * from celery_taskmeta")
-            result = conn.execute("select * from celery_taskmeta")
-            for row in result:
-                # logging.debug(f"{row}")
-                if row[1] == worker_id:
-                    if row[2] == "SUCCESS":
-                        hash = pickle.loads(row[3])
-                        logging.debug(f"Status {row[2]} for element {id} with hash {hash}")
-                        return { "status" : row[2] , "hash" : hash }
-                    else:
-                        logging.info(f"Status {row[2]} for element {id}")
-                        return { "status" : row[2] , "hash" : None }
-            logging.error(f"Unable to find id = {id} in working database. :-(")
-        logging.error(f"Seems like search in database went wrong. Worker should be there! But it's not.")
-        return { "status" : "FIND_WORKER_ERROR" , "hash" : None }
+            result = conn.execute(f"SELECT * from files_quene WHERE id = '{id}'").all()
+        if result != []:
+            worker_id = self.session.query(FileForProcessing).get(id).worker_id
+            logging.debug(f"Worker for  `{id}` found: {worker_id}")
+
+            with self.engine.connect() as conn:
+                result = conn.execute(f"SELECT task_id,status,result from celery_taskmeta WHERE task_id = '{worker_id}'").all()
+            if result != []:
+                result_row = result[0]
+                status = result_row[1]
+                if status == "SUCCESS":
+                    hash = pickle.loads(result_row[2])
+                    logging.debug(f"Status {status} for element {id} with hash {hash}")
+                    return { "status" : status , "hash" : hash }
+                else:
+                    return { "status" : status , "hash" : None }
+            else:
+                # No worker found
+                return { "status" : "FIND_WORKER_ERROR" , "hash" : None }
+        else:
+            return { "status" : "INVALID_ID" , "hash" : None }
     
     def drop_all_files(self):
         """Delete database table. Cruel."""
