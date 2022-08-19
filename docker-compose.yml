@@ -21,7 +21,7 @@ services:
   upload_api:
     container_name: upload_api_inst
     build: .
-    command: uvicorn main_upload_api:app --host "0.0.0.0" --port "8000"
+    command: uvicorn main_upload_api:app --host "0.0.0.0" --port ${API_PORT}
     restart: always
     extra_hosts:
       - host.docker.internal:host-gateway
@@ -29,7 +29,7 @@ services:
       - ./appdata:/api/appdata
       - ./logs:/api/logs
     ports:
-      - "8000:8000"
+      - "${API_PORT}:${API_PORT}"
     depends_on:
       - postgres
 

@@ -5,25 +5,27 @@
 # Usage (API reference):
 
 ### To send file
-Client (browser or another host) can sent HTTP post request containing file. In return he will get JSON in form of:
+Client (browser or another host) can send HTTP post request containing file. In return, he will get JSON in the form of:
 `{ "success" : True/False , "id" : id/None, "celery_status" : status/None , "celery_id" : celery_task_id/none }`
 None values correspond to `"success" : False` case.
 
-You are free to use api docs `host:8000/docs` to check all by yourself. Or you can use request python scripts to quickly generate the POST requests.
+You are free to use API docs `host:8000/docs` to check all by yourself. Or you can use request python scripts to quickly generate the POST requests.
+
 
 ### To get hash
 
+To get hash, you can use `host:8000/get_hash/{id}` or send ID as request variable: `http://localhost:8000/gethash/?file_id=1`. In return, you get JSON in a form of `{ "status" : status(str) , "hash" : hash(str) }`. In case task is not finished, status will be `'PENDING'`. In case of invalid `id` it should be `"status":'INVALID_ID'`
 ### Folder structure
 
     md5_calc_api
     ├── docs                    # Documentation and task files
     ├── src                     # Source files for API and celery workers. 
     ├── celery                  # 
-    ├── docker                  # Docker config files for external pre build modules (postgres etc) 
+    ├── docker                  # Docker config files for external pre-build modules (Postgres etc.) 
     ├── tests                   # Automated and not so automated tests
-    ├── autoinstall.sh          # Smart install script for linux
+    ├── autoinstall.sh          # Smart install script for Linux
     ├── docker-compose.yml      #  Docker compose file for deploying and building containers
-    ├── .env                    #  Important file with enviormental variables. autoinstall script can generate it.
+    ├── .env                    #  Important file with environmental variables. autoinstall script can generate it.
     ├── env_example             #  This is a template for `.env` file.
     ├── Dockerfile
     ├── LICENSE
@@ -48,7 +50,7 @@ docker-compose up -d --build`
 ### Linux (any)
 Docker (for container managment). You can read about installing docker here: https://docs.docker.com/engine/install/
 ### Ubuntu
-postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygwin/Babun.). For SQLAlchemy to work.
+postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygwin/Babun.). For SQL Alchemy to work.
 
 
 
@@ -68,7 +70,7 @@ Main python sources folder. Here are all code including API and celery workers.
     └── templates # HTML templates for the application
 
 ## Tests folder
-Tests folder consists of set of tests for the API goal. `simple_test.py` provides low load test to enshure code is working correctly. Organized as unit test. However, giving what this API should proof I created `load_test.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
+Tests folder consists of a set of tests for the API goal. `simple_test.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `load_test.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
 
 
 
@@ -77,14 +79,17 @@ Tests folder consists of set of tests for the API goal. `simple_test.py` provide
 
 # Known limitations
 * No mechanism to work when parts are distributed behind the proxy server or firewall (mainly to work in local network).
+* No security to work in open network. No authorization mechanism.
 * File reception of API are limited by filesystem which is common across all the system.
 * Not tested in distributed setup
 
 # TODO
 
 * `mkdir logs` Folder for logging. Can be altered in docker-compose.yml
-* Connection between celery worker results in Postgress and task ID for API database are not related. That ban be fixed easily to enable quicker result search time. However I'm afraid I don't have time to do it right now.
+* Connection between celery worker results in Postgress and task ID for API database are not related. That ban be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
 * Proper catch for out of range ID requests
 
 # Other
-* Full tasl by task log of development was also posted in my telegram: https://t.me/ee_craft
+* Full task by task log of development was also posted in my telegram: https://t.me/ee_craft
+
+
