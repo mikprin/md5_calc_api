@@ -27,6 +27,31 @@ To get hash, you can use `host:8000/get_hash/{id}` or send ID as request variabl
     ├── LICENSE
     └── README.md
 
+### Settings
+
+Local settings are modified in `.env` file.
+
+`API_PORT=8000` - Default port of API
+
+`DB_HOST=${localhost_var}` - host for database. Database is also created as standalone container
+`DB_PORT=5432` - database port
+`DB_USER=postgres` - database user
+`DB_PASSWORD=newpassword` - database password
+`DB_NAME=md5hashes` - database name
+
+`REDIS_URL=redis` 
+
+`CELERY_BROKER_PORT=6379`
+`CELERY_BROKER_URL="redis://${REDIS_URL}:${CELERY_BROKER_PORT}/0"`
+`CELERY_RESULT_BACKEND='db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}'`
+
+Optional settings for pgadmin container are:
+`PGADMIN_EMAIL=admin@admin.com`
+`PGADMIN_PASSWORD=admin`
+This should indicate how long celery worker waits for file (if some glitches in OS appear and file are not there.)
+`CELERY_WORKER_FILESYSTEM_TIMEOUT=10`
+
+`DELETE_FILE=true/false` default `false` : If true, worker will delete file as soon as hash has been hashed. 
 # Deployment
 ## Automated
 Use `autoinstall.sh` to generate 2 empty folders (volumes) needed by the system and launch docker compose with newly generated `.env` file. I DO NOT save `.env` file in the git repo to prevent passwords leakage.
@@ -37,18 +62,12 @@ Use `autoinstall.sh` to generate 2 empty folders (volumes) needed by the system 
 3. `cp env_example .env` To copy the env variables.
 4. `docker-compose up -d --build` to deploy.
 
-cd $DIR
-docker-compose up -d --build`
-
 
 ## Dependencies
 ### Linux (any)
 Docker (for container managment). You can read about installing docker here: https://docs.docker.com/engine/install/
 ### Ubuntu
 postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygwin/Babun.). For SQL Alchemy to work.
-
-
-
 
 # Source structure
 
@@ -64,12 +83,16 @@ Main python sources folder. Here are all code including API and celery workers.
     ├── settings.py # Code to import `.env` variables
     └── templates # HTML templates for the application
 
-## Tests folder
+## tests
 Tests folder consists of a set of tests for the API goal. `simple_test.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `load_test.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
 
+## doc
 
+Related to task description, pictures, etc
 
-# Testing
+# Testing procedure
+
+Still to come
 
 
 # Known limitations

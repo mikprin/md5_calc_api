@@ -39,5 +39,7 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
             if total_wait_time > max_timeout:
                 logging.error(f"Worker failed to find file {file_path}")
                 return "ERROR"
+    if os.getenv("DELETE_FILE").lower() == 'true':
+        os.remove(file_path)
     return hash
     
