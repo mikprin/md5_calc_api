@@ -6,7 +6,7 @@ This is an API develop as a part of Bostongene onboarding contest. Goal was to c
 # Usage (API reference):
 You are free to use API docs `host:8000/docs` to check all by yourself. Or you can use request python scripts to quickly generate the POST requests. Or use them as reference. My text explanation is below:
 ### To send file
-Client (browser or another host) can send HTTP post request containing file. In return, he will get JSON in the form of:
+Client (browser or another host) can send HTTP post request containing the file under `file` field. In return, he will get JSON in the form of:
 `{ "success" : True/False , "id" : id/None, "celery_status" : status/None , "celery_id" : celery_task_id/none }`
 None values correspond to `"success" : False` case.
 ### To get hash
@@ -96,8 +96,8 @@ Still to come
 
 
 # Known limitations
-* No mechanism to work when parts are distributed behind the proxy server or firewall (mainly to work in local network).
-* No security to work in open network. No authorization mechanism.
+* No mechanism to work when parts are distributed behind the proxy server or firewall (mainly to work in local network). Exept database and broker. This can be modified in future.
+* No security mechanisms to work in open network. (No authorization mechanism.)
 * File reception of API are limited by filesystem which is common across all the system.
 * Not tested in distributed setup
 * IDs are not secure numbers. But can be easily made so by using celery worker ID as ID.
