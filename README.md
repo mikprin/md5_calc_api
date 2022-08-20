@@ -114,10 +114,11 @@ Still to come
 
 # TODO
 
-* `mkdir logs` Folder for logging. Can be altered in docker-compose.yml
+* `logs` Folder for logging. Can be altered in docker-compose.yml
 * Connection between celery worker results in Postgress and task ID for API database are not related. That ban be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
 * Proper catch for out of range ID requests
 * Better querys for SQL
+* "Pending" status page
 
 # Other
 * Full task by task log of development was also posted in my telegram: https://t.me/ee_craft

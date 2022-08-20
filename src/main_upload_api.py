@@ -78,7 +78,7 @@ async def root():
 async def get_file_hash(file_id: int ):
     ''' Get MD5 from the server back. fild ID as input hash as output. '''
     logging.info(f"Getting hash for {file_id}")
-    print(f"Getting hash for {file_id}")
+    # print(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
     # result = 1
     # Check that hash exists in the database here
@@ -88,12 +88,20 @@ async def get_file_hash(file_id: int ):
 async def get_file_hash_from_url(file_id: int ):
     ''' Get MD5 from the server back but pass URL as ID '''
     logging.info(f"Getting hash for {file_id}")
-    print(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
-    # Check that hash exists in the database here
-    # result = 1
     return result
 
+@app.get("/gethash-form/")
+async def get_file_hash_from_url(file_id: int ):
+    ''' Get MD5 from the server back but get HTML in return'''
+    logging.info(f"Getting hash for {file_id}")
+    result = await get_hash_from_database(file_id, database)
+    if result["status"] == "SUCCESS":
+        return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] })
+    elif result["status"] == "PENDING":
+        pass
+    else:
+        return templates.TemplateResponse("return_hash_error.html", { "status": result["status"] })
 @app.post("/uploadfile/")
 async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
     ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
