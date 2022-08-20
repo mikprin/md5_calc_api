@@ -65,6 +65,7 @@ services:
 
  
   celery_worker:
+    container_name: celery_worker_0
     build: .
     command: celery -A celery_worker.celery worker --loglevel=info
     volumes:
@@ -79,17 +80,18 @@ services:
       - redis
       - postgres
 
-  celery_worker1:
-    build: .
-    command: celery -A celery_worker.celery worker --loglevel=info
-    volumes:
-      - .:/app
-      - ./appdata:/api/appdata
-      - ./logs:/api/logs
-    env_file:
-      - .env
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    depends_on:
-      - redis
-      - postgres
+  # celery_worker1:
+  #   container_name: celery_worker_1
+  #   build: .
+  #   command: celery -A celery_worker.celery worker --loglevel=info
+  #   volumes:
+  #     - .:/app
+  #     - ./appdata:/api/appdata
+  #     - ./logs:/api/logs
+  #   env_file:
+  #     - .env
+  #   extra_hosts:
+  #     - host.docker.internal:host-gateway
+  #   depends_on:
+  #     - redis
+  #     - postgres

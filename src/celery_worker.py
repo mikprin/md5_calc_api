@@ -56,7 +56,7 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
             #         # log here
             # acquire a blocking lock
             # lock.acquire() # DANGER
-            logging.debug(f"lock.locked() == {lock.locked()}")
+            # logging.debug(f"lock.locked() == {lock.locked()}")
         else:
             logging.info(f"Waiting for file  {file_path} to arrive")
             time.sleep(delay_step)

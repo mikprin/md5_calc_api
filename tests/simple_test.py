@@ -1,7 +1,16 @@
+from this import s
+from urllib import response
 from test_reqests.recive_hash import *
-from test_reqests.send_file import * # Send file
+from test_reqests.send_file import send_file # Send file
+from test_reqests.get_hash import get_hash
+import argparse, time
 
-import argparse
+test_file_size = 1024
+        
+        
+def generate_random_file(path,size):
+    with open("path", 'wb') as fout:
+        fout.write(os.urandom(size))
 
 if __name__ == '__main__':
     
@@ -20,9 +29,35 @@ if __name__ == '__main__':
     else:
         port = "8000"
     
-        
-        
-def generate_random_file(path,size):
-    with open("path", 'wb') as fout:
-        fout.write(os.urandom(size))
+    test_url = f"http://{url}:{port}/"
+
+    test_file_name = "test_file"
+    generate_random_file(test_file_name,test_file_size)
     
+    # send_time = 
+    
+    
+    response = send_file(test_file_name,test_url)
+    start = time.time()
+    response_content = response.json()
+    state = response_content["success"]
+    if state:
+        file_id = response_content["id"]
+    else:
+        # Send file FAIL here
+        pass
+
+    while state == "PENDING":
+        response = get_hash(test_file_name,test_url)
+        response_content = response.json()
+        
+        pass
+
+    if state == "success":
+        pass
+    else:
+        pass
+    end = time.time()
+
+    # if response
+    # get_hash
