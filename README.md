@@ -11,6 +11,16 @@ Client (browser or another host) can send HTTP post request containing the file 
 None values correspond to `"success" : False` case.
 ### To get hash
 To get hash, you can use `host:8000/get_hash/{id}` or send ID as request variable: `http://localhost:8000/gethash/?file_id=1`. In return, you get JSON in a form of `{ "status" : status(str) , "hash" : hash(str) }`. In case task is not finished, status will be `'PENDING'`. In case of invalid `id` it should be `"status":'INVALID_ID'`.
+
+
+### Frontend app
+
+To use frontend app go to:
+
+`host:8000/uploadform`. You should be faced with this page where you can upload your file and get ID back. On all pages you also sould be presented with form to request the result from the ID.
+
+
+![Crude frontend app example](./doc/frontend_example.png)
 ### Folder structure
 
     md5_calc_api
@@ -99,7 +109,7 @@ Still to come
 * No mechanism to work when parts are distributed behind the proxy server or firewall (mainly to work in local network). Exept database and broker. This can be modified in future.
 * No security mechanisms to work in open network. (No authorization mechanism.)
 * File reception of API are limited by filesystem which is common across all the system.
-* Not tested in distributed setup
+* Not tested in distributed setup. For example when reddis are in the LAN. But non localhost redis makes this a little bit pointless.
 * IDs are not secure numbers. But can be easily made so by using celery worker ID as ID.
 
 # TODO
