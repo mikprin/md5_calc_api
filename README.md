@@ -98,7 +98,7 @@ Main python sources folder. Here are all code including API and celery workers.
     └── templates # HTML templates for the application
 
 ## tests
-Tests folder consists of a set of tests for the API goal. `test_simple.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `test_heavy.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
+Tests folder consists of a set of tests for the API goal. `test_simple.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `test_heavy.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests.  Be advised: tests use their own `md5_rest_api/tests/requirements.txt` file for dependencies. 
 
 ## doc
 
@@ -106,7 +106,7 @@ Related to task description, pictures, etc
 
 # Testing procedure
 
-Still to come
+Run `pytest`, to execute test procedure for the basic flow. 
 
 
 # Known limitations
@@ -123,8 +123,9 @@ Still to come
 * [x] Proper catch for out of range ID requests
 * [ ] Better queries for SQL
 * [x] "Pending" status page
-* [ ] Tests
-* [ ] Testing procedure description
+* [x] Tests
+* [x] Testing procedure description
+* [ ] Heavy tests
 
 # Other
 * Full task by task log of development was also posted in my telegram: https://t.me/ee_craft
