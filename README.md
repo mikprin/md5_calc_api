@@ -30,7 +30,6 @@ For testing features you can add `ARTIFITIAL_DELAY=10` to the `.env` file to add
     md5_calc_api
     ├── docs                    # Documentation and task files
     ├── src                     # Source files for API and celery workers. 
-    ├── celery                  # 
     ├── docker                  # Docker config files for external pre-build modules (Postgres etc.) 
     ├── tests                   # Automated and not so automated tests
     ├── .github                 # Contains github automation yaml. 
@@ -99,7 +98,7 @@ Main python sources folder. Here are all code including API and celery workers.
     └── templates # HTML templates for the application
 
 ## tests
-Tests folder consists of a set of tests for the API goal. `simple_test.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `load_test.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
+Tests folder consists of a set of tests for the API goal. `test_simple.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `test_heavy.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
 
 ## doc
 
@@ -121,9 +120,11 @@ Still to come
 * [x] CI/CD pipeline in github actions.
 * [ ] `logs` Folder for logging. Make that the name and path of the folder can be altered in docker-compose.yml
 * [ ] Connection between celery worker results in Postgress and task ID for API database are not related. That can be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
-* [ ] Proper catch for out of range ID requests
-* [ ] Better querys for SQL
-* [ ] "Pending" status page
+* [x] Proper catch for out of range ID requests
+* [ ] Better queries for SQL
+* [x] "Pending" status page
+* [ ] Tests
+* [ ] Testing procedure description
 
 # Other
 * Full task by task log of development was also posted in my telegram: https://t.me/ee_craft
