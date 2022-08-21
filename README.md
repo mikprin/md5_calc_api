@@ -43,29 +43,16 @@ For testing features you can add `ARTIFITIAL_DELAY=10` to the `.env` file to add
 
 ### Settings
 
-Local settings are modified in `.env` file.
+Local settings are modified in `.env` file.  Example is presented in `env_example` file. Some other settings:
 
 `API_PORT=8000` - Default port of API
 
-`DB_HOST=${localhost_var}` - host for database. Database is also created as standalone container
-`DB_PORT=5432` - database port
-`DB_USER=postgres` - database user
-`DB_PASSWORD=newpassword` - database password
-`DB_NAME=md5hashes` - database name
-
-`REDIS_URL=redis` 
-
-`CELERY_BROKER_PORT=6379`
-`CELERY_BROKER_URL="redis://${REDIS_URL}:${CELERY_BROKER_PORT}/0"`
-`CELERY_RESULT_BACKEND='db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}'`
-
-Optional settings for pgadmin container are:
-`PGADMIN_EMAIL=admin@admin.com`
-`PGADMIN_PASSWORD=admin`
-This should indicate how long celery worker waits for file (if some glitches in OS appear and file are not there.)
-`CELERY_WORKER_FILESYSTEM_TIMEOUT=10`
+`CELERY_WORKER_FILESYSTEM_TIMEOUT=10` - This should indicate how long celery worker waits for file (if some glitches in OS appear and file are not there.)
 
 `DELETE_FILE=true/false` default `false` : If true, worker will delete file as soon as hash has been hashed. 
+
+`ARTIFITIAL_DELAY=0` - Indicates if extra delay is added for testing
+
 # Deployment
 ## Automated
 Use `autoinstall.sh` to generate 2 empty folders (volumes) needed by the system and launch docker compose with newly generated `.env` file. I DO NOT save `.env` file in the git repo to prevent passwords leakage.
