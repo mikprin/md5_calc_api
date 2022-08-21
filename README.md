@@ -20,6 +20,9 @@ To use frontend app go to:
 
 `host:8000/uploadform`. You should be faced with this page where you can upload your file and get ID back. On all pages you also sould be presented with form to request the result from the ID.
 
+### Artifitial delay for testing
+
+For testing features you can add `ARTIFITIAL_DELAY=10` to the `.env` file to add delay to the celery worker.
 
 ![Crude frontend app example](./doc/frontend_example.png)
 ### Folder structure

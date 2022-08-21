@@ -166,7 +166,12 @@ async def save_and_start_hashing(file, database):
     if database.add_file_to_quene(id, filename):
         saved_file_path = os.path.join( filesystem_work_point , filename)
         await save_file(file,saved_file_path)
-        worker = md5sum.delay(filename)
+        artificial_delay = os.getenv("ARTIFITIAL_DELAY")
+        if artificial_delay:
+            artificial_delay_int = int(artificial_delay)
+        else:
+            artificial_delay_int = 0
+        worker = md5sum.delay(filename,artificial_delay = artificial_delay_int )
         database.add_worker_id(id,worker.id)
         return{ "success" : True , "id" : id, "celery_status" : worker.status, "celery_id" : worker.id }
     else:

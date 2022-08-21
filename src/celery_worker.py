@@ -3,6 +3,7 @@ import logging, os, time
 import hashlib, redis
 from celery import Celery
 
+from typing import Union
 # Import settings from env.
 from dotenv import load_dotenv
 
@@ -29,15 +30,18 @@ celery.conf.result_backend = os.getenv("CELERY_BROKER_URL")
 
 # CELERY_RESULT_BACKEND = 'db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}'
 @celery.task
-def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, delay_step = 0.5 , log_mutex_name = "log_mutex_new"):
-    # lock = Lock('celecy_log_lock')
-    total_wait_time = 0
+def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, delay_step = 0.5 , log_mutex_name = "log_mutex_new", artificial_delay  : Union[int,bool]  = False ):
+    """Worker main function. Calculate hash of the file in `worker_appdata_mount_point` relative to container FS"""
+    total_wait_time = 0 # Zero time counter
     
-    logfile = "../logs/worker.log"
+    logfile = "../logs/worker.log" # Logfile hardcoded for now
     
     redis_connection = get_redis_connection()
-    # lock = RedisLock(log_mutex_name, client=r)
+    # lock = RedisLock(log_mutex_name, client=r) # Now using with
     
+    if artificial_delay:
+        time.sleep(artificial_delay)
+
     file_ready = False
     file_path = os.path.join(worker_appdata_mount_point,path)
     logging.info(f"Hashing {file_path}")
@@ -47,17 +51,21 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
         file_ready = os.path.isfile(file_path)
         # logging.info(f"FILE IS READY: {file_ready}")
         if file_ready:
+            # Read file and calculate hash
             with open(file_path,'rb') as descriptor:
                 hash = hashlib.md5(descriptor.read()).hexdigest()
             logging.info(f"Hash for {file_path} is: {hash}")
-            with redis_connection.lock(log_mutex_name):
-                with open(logfile,'a+') as log:
-                    log.write(f"\n{file_path} : {hash}")
-            #         # log here
-            # acquire a blocking lock
-            # lock.acquire() # DANGER
-            # logging.debug(f"lock.locked() == {lock.locked()}")
+
+            # Log to file using mutex
+            if redis_connection: # Check if redis connection exists
+                with redis_connection.lock(log_mutex_name):
+                    with open(logfile,'a+') as log:
+                        log.write(f"\n{file_path} : {hash}")
+                # logging.debug(f"lock.locked() == {lock.locked()}")
+            else:
+                logging.error(f"ERROR: No redis connection for mutex is availible. NO LOGGING IN FILE")
         else:
+            # If file is busy
             logging.info(f"Waiting for file  {file_path} to arrive")
             time.sleep(delay_step)
             total_wait_time += delay_step
@@ -70,7 +78,7 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
     
     
 def get_redis_connection():
-    # Check if redis is ok
+    """Check if redis is ok. Get redis connection"""
     redis_connection = redis.StrictRedis(host=os.getenv("TRUE_REDIS_URL"), port=int(os.getenv("CELERY_BROKER_PORT")), db=2, decode_responses=True)
     try:
         redis_connection.get("test")
