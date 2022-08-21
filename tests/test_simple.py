@@ -91,3 +91,5 @@ if __name__ == '__main__':
     test_url = f"http://{url}:{port}/"
     test_simple(test_url)
     
+    sys.exit(0)
+    
