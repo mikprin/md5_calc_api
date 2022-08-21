@@ -13,4 +13,4 @@ python-dotenv
 redis
 flower
 
-git+https://github.com/vaidik/sherlock@99ef85750d5fa48633b40b798f12668ea91fd700 # sherlock
+# git+https://github.com/vaidik/sherlock@99ef85750d5fa48633b40b798f12668ea91fd700 # sherlock

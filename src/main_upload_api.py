@@ -85,14 +85,14 @@ async def get_file_hash(file_id: int ):
     return result
 
 @app.get("/gethash/{file_id}")
-async def get_file_hash_from_url(file_id: int ):
+async def get_file_hash_from_url(file_id: int , request: Request):
     ''' Get MD5 from the server back but pass URL as ID '''
     logging.info(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
     return result
 
 @app.get("/gethash-form/")
-async def get_file_hash_from_url(file_id: int ):
+async def get_file_hash_from_url(file_id: int , request: Request ):
     ''' Get MD5 from the server back but get HTML in return'''
     logging.info(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
@@ -101,7 +101,8 @@ async def get_file_hash_from_url(file_id: int ):
     elif result["status"] == "PENDING":
         pass
     else:
-        return templates.TemplateResponse("return_hash_error.html", { "status": result["status"] })
+        return templates.TemplateResponse("return_hash_error.html", { "status": result["status"] , "request": request  })
+    
 @app.post("/uploadfile/")
 async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
     ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
