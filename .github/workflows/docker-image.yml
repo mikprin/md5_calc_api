@@ -16,6 +16,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    # - name: Install docker docker-compose
+    #   run: |
+    #     # sudo apt install gnome-terminal
+    #     sudo apt-get update
+    #     # sudo apt install docker-compose
+    #     sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     - name: Build the Docker image
       # run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
       run: cp env_example .env && mkdir -p logs && mkdir -p appdata  && docker-compose up -d --remove-orphans --build && docker ps --all
