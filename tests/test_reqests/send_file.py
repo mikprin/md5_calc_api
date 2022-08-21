@@ -36,4 +36,4 @@ def send_file(test_file_path,test_url):
     return test_response
 
 if __name__ == '__main__':
-    send_file(test_file_path)
+    send_file(test_file_path,test_url)

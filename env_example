@@ -2,9 +2,9 @@ true_localhost=localhost
 docker_localhost="host.docker.internal"
 localhost_var=${docker_localhost}
 
-ARTIFITIAL_DELAY=0
-
 API_PORT=8000
+
+ARTIFITIAL_DELAY=0
 
 # SYSTEM_LOG_DIR_PATH=logs
 
@@ -16,11 +16,11 @@ DB_NAME=md5hashes
 
 TRUE_REDIS_URL=${localhost_var}
 
-REDIS_URL=redis
+CELERY_REDIS_URL=redis
 
 CELERY_BROKER_PORT=6379
-CELERY_BROKER_URL="redis://${REDIS_URL}:${CELERY_BROKER_PORT}/0"
-CELERY_RESULT_BACKEND='db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}'
+CELERY_BROKER_URL="redis://${CELERY_REDIS_URL}:${CELERY_BROKER_PORT}/0"
+CELERY_BROKER_URL_LOCALHOST="redis://${localhost_var}:${CELERY_BROKER_PORT}/0"
 
 PGADMIN_EMAIL=admin@admin.com
 PGADMIN_PASSWORD=admin
