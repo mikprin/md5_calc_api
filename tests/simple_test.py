@@ -1,4 +1,4 @@
-from this import s
+# from this import s
 from urllib import response
 from test_reqests.recive_hash import *
 from test_reqests.send_file import send_file # Send file
@@ -9,7 +9,7 @@ test_file_size = 1024
         
         
 def generate_random_file(path,size):
-    with open("path", 'wb') as fout:
+    with open(path, 'wb') as fout:
         fout.write(os.urandom(size))
 
 if __name__ == '__main__':
@@ -47,17 +47,20 @@ if __name__ == '__main__':
         # Send file FAIL here
         pass
 
-    while state == "PENDING":
+    if state == "PENDING":
+        while state == "PENDING":
+            response = get_hash(test_file_name,test_url)
+            response_content = response.json()
+            state = response_content["status"]
+    else:
         response = get_hash(test_file_name,test_url)
         response_content = response.json()
-        
-        pass
-
+        state = response_content["status"]
     if state == "success":
-        pass
+        print(f"Test passed! Hash is {response_content['hash']}")
     else:
-        pass
+        print(f"No success! Status is {response_content['status']}")
     end = time.time()
-
+    print (f"total_time = {end - start}s ")
     # if response
     # get_hash
