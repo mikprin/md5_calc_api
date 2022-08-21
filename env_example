@@ -14,6 +14,8 @@ DB_USER=postgres
 DB_PASSWORD=newpassword
 DB_NAME=md5hashes
 
+TRUE_REDIS_URL=${localhost_var}
+
 REDIS_URL=redis
 
 CELERY_BROKER_PORT=6379
