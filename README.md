@@ -110,12 +110,12 @@ Still to come
 * No security mechanisms to work in open network. (No authorization mechanism.)
 * File reception of API are limited by filesystem which is common across all the system.
 * Not tested in distributed setup. For example when reddis are in the LAN. But non localhost redis makes this a little bit pointless.
-* IDs are not secure numbers. But can be easily made so by using celery worker ID as ID.
+* IDs are not secure numbers (can be guessed). But can be easily made so by using celery worker ID as ID.
 
 # TODO
-
-* `logs` Folder for logging. Can be altered in docker-compose.yml
-* Connection between celery worker results in Postgress and task ID for API database are not related. That ban be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
+* CI/CD pipeline in github actions
+* `logs` Folder for logging. Make that the name and path of the folder can be altered in docker-compose.yml
+* Connection between celery worker results in Postgress and task ID for API database are not related. That can be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
 * Proper catch for out of range ID requests
 * Better querys for SQL
 * "Pending" status page
