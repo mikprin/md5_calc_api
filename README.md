@@ -64,6 +64,33 @@ Use `autoinstall.sh` to generate 2 empty folders (volumes) needed by the system 
 4. `docker-compose up -d --build` to deploy.
 
 
+## Removing the API
+
+To remove the API use `docker-compose stop && docker-compose rm` command when in the repository folder.
+
+## To add/remove worker
+
+To add or remove worker you can just add new worker container in `docker-compose.yml` file like so:
+
+```
+  celery_worker1:
+    container_name: celery_worker_1
+    build: .
+    command: celery -A celery_worker.celery worker --loglevel=info
+    restart: always
+    volumes:
+      - .:/app
+      - ./appdata:/api/appdata
+      - ./logs:/api/logs
+    env_file:
+      - .env
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - redis
+      - postgres
+```
+
 ## Dependencies
 ### Linux (any)
 Docker (for container managment). You can read about installing docker here: https://docs.docker.com/engine/install/
