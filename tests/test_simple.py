@@ -1,5 +1,5 @@
 # from this import s
-from urllib import response
+# from urllib import response
 from test_reqests.recive_hash import *
 from test_reqests.send_file import send_file # Send file
 from test_reqests.get_hash import get_hash

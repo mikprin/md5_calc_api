@@ -1,5 +1,5 @@
-from importlib.metadata import files
-from wsgiref.util import request_uri
+# from importlib.metadata import files
+# from wsgiref.util import request_uri
 import requests
 import os, sys
 
