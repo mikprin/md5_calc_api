@@ -34,7 +34,6 @@ root_path = pathlib.Path(__file__).parent.resolve()
 current_dir = pathlib.Path().resolve()
 logging.info(f"Working dir: {current_dir}")
 
-
 # There are two options for database: real one and a temp one in memory
 
 
@@ -97,9 +96,11 @@ async def get_file_hash_from_url(file_id: int , request: Request ):
     logging.info(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
     if result["status"] == "SUCCESS":
-        return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] })
+        return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] ,  "request": request  })
     elif result["status"] == "PENDING":
         pass
+        # PENDING HTML
+        # return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] ,  "request": request  })
     else:
         return templates.TemplateResponse("return_hash_error.html", { "status": result["status"] , "request": request  })
     
