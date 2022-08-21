@@ -28,7 +28,7 @@ def calc_hash(file_path):
     return hash
     
     
-def commit_simple_test(test_url):
+def test_simple(test_url = "http://localhost:8000/"):
     test_file_name = "test_file"
     test_passed = 0
     random_file_size = random.randint(*test_file_range)
@@ -67,7 +67,7 @@ def commit_simple_test(test_url):
         print(f"No success! Status is {response_content['status']}")
     end = time.time()
     print (f"total_time = {end - start}s ")
-
+    assert test_passed == 1
     return test_passed
     
     
@@ -89,5 +89,5 @@ if __name__ == '__main__':
         port = "8000"
     
     test_url = f"http://{url}:{port}/"
-    commit_simple_test(test_url)
+    test_simple(test_url)
     

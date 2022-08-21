@@ -98,7 +98,7 @@ Main python sources folder. Here are all code including API and celery workers.
     └── templates # HTML templates for the application
 
 ## tests
-Tests folder consists of a set of tests for the API goal. `simple_test.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `load_test.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
+Tests folder consists of a set of tests for the API goal. `test_simple.py` provides low load test to ensure code is working correctly. Organized as unit test. However, giving what this API should prove, I created `test_heavy.py` which can heavily load the API and backend with set of randomly generated files with pre known hash and throw them at the server counting time to return query of requests. 
 
 ## doc
 
