@@ -131,7 +131,6 @@ class API_database( ):
     
     def drop_all_files(self):
         """Delete database table. Cruel."""
-        # FileForProcessing.__table__.drop(self.engine) # NOT WORKING COORECTLY!
         for id in self.get_all_ids():
             self.session.query(FileForProcessing).filter(FileForProcessing.id==id).delete()
             # file_to_delete = FileForProcessing.query.get(id)

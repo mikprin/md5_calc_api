@@ -22,11 +22,49 @@
             margin-left: auto;
             margin-right: auto;
           }
-        
+          input, textarea {
+            border: 3px solid #eee;
+            padding: .4em 1em;
+            border-radius: 6px;
+          }
+      
+          form {
+            display: grid;
+            grid-row-gap: 10px;
+            justify-content: center;
+          }
+      
+          button {
+            margin-top: 10px;
+            background: #133EF5;
+            color: #fff;
+            padding: 10px 0;
+            border: 0;
+            border-radius: 6px;
+          }
+
+          body {
+            font-family: "Inter";
+          }
+      
+          label, button {
+            font-size: 16px;
+            cursor: pointer;
+            
+          }
+          form {
+            margin-top: 40px;
+            margin-bottom: 40px;
+          }
     </style>
 <body>
-    <h1>Unfortunatly something went very wrong. And we was not able to get hash from the database. We are sorry. If that helps ypu here is the error status: {{status}}</h1>
-    <img src="https://i.kym-cdn.com/photos/images/newsfeed/000/356/812/b46.jpg" alt="WE ARE SORRY"> 
+    <h1>Unfortunatly something went very wrong. And we was not able to get hash from the database. We are sorry. If that helps you, here is the error status: {{status}}</h1>
+    <img src="https://i.kym-cdn.com/photos/images/newsfeed/000/356/812/b46.jpg" alt="WE ARE SORRY">
+    <form action="/gethash-form/" method="GET" >
+        <label for="file_id">Get hash from the ID. Print ID below.</label>
+        <input type="number" id="file_id" name="file_id">
+        <button type="submit">Get hash!</button>
+      </form>
 </body>
 
 </html>

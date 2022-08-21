@@ -22,9 +22,9 @@ celery.conf.result_backend = os.getenv("CELERY_BROKER_URL")
 # Configure Sherlock's locks to use Redis as the backend,
 # never expire locks (actually 120s) and retry acquiring an acquired lock after an
 # interval of 0.05 second.
-import sherlock
-from sherlock import RedisLock
-sherlock.configure(expire=None, timeout=20,retry_interval=0.05)
+# import sherlock
+# from sherlock import RedisLock
+# sherlock.configure(expire=None, timeout=20,retry_interval=0.05)
 
 
 # CELERY_RESULT_BACKEND = 'db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}'
@@ -37,7 +37,7 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
     
     redis_connection = get_redis_connection()
     # lock = RedisLock(log_mutex_name, client=r)
-        
+    
     file_ready = False
     file_path = os.path.join(worker_appdata_mount_point,path)
     logging.info(f"Hashing {file_path}")
@@ -50,9 +50,9 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
             with open(file_path,'rb') as descriptor:
                 hash = hashlib.md5(descriptor.read()).hexdigest()
             logging.info(f"Hash for {file_path} is: {hash}")
-            # with RedisLock(log_mutex_name, client = redis_connection) as lock:
-            #     with open(logfile,'a+') as log:
-            #         log.write(f"\n{file_path} : {hash}")
+            with redis_connection.lock(log_mutex_name):
+                with open(logfile,'a+') as log:
+                    log.write(f"\n{file_path} : {hash}")
             #         # log here
             # acquire a blocking lock
             # lock.acquire() # DANGER
@@ -71,7 +71,7 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
     
 def get_redis_connection():
     # Check if redis is ok
-    redis_connection = redis.Redis(host=os.getenv("TRUE_REDIS_URL"), port=int(os.getenv("CELERY_BROKER_PORT")), db=2, decode_responses=True)
+    redis_connection = redis.StrictRedis(host=os.getenv("TRUE_REDIS_URL"), port=int(os.getenv("CELERY_BROKER_PORT")), db=2, decode_responses=True)
     try:
         redis_connection.get("test")
     except:

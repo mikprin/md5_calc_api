@@ -11,7 +11,7 @@ Client (browser or another host) can send HTTP post request containing the file 
 `{ "success" : True/False , "id" : id/None, "celery_status" : status/None , "celery_id" : celery_task_id/none }`
 None values correspond to `"success" : False` case.
 ### To get hash
-To get hash, you can use `host:8000/get_hash/{id}` or send ID as request variable: `http://localhost:8000/gethash/?file_id=1`. In return, you get JSON in a form of `{ "status" : status(str) , "hash" : hash(str) }`. In case task is not finished, status will be `'PENDING'`. In case of invalid `id` it should be `"status":'INVALID_ID'`.
+To get hash, you can use `host:8000/get_hash/gethash/?file_id={id}` or send ID as request variable: As JSON  with `{"file_id" : id}` to `host:8000/get_hash/gethash/`. In return, you get JSON in a form of `{ "status" : status(str) , "hash" : hash(str) }`. In case task is not finished, status will be `'PENDING'`. In case of invalid `id` it should be `"status":'INVALID_ID'`.
 
 
 ### Frontend app
@@ -30,11 +30,12 @@ To use frontend app go to:
     ├── celery                  # 
     ├── docker                  # Docker config files for external pre-build modules (Postgres etc.) 
     ├── tests                   # Automated and not so automated tests
-    ├── autoinstall.sh          # Smart install script for Linux
+    ├── .github                 # Contains github automation yaml. 
+    ├── autoinstall.sh          # Smart deploy script for Linux
     ├── docker-compose.yml      #  Docker compose file for deploying and building containers
     ├── .env                    #  Important file with environmental variables. autoinstall script can generate it.
     ├── env_example             #  This is a template for `.env` file.
-    ├── Dockerfile
+    ├── Dockerfile              # Sinle docker file for both API and worker
     ├── LICENSE
     └── README.md
 
@@ -88,10 +89,10 @@ Main python sources folder. Here are all code including API and celery workers.
 
 
     src
-    ├── celery_worker.py # Code for celery
-    ├── database_tools.py # Tools for SQLAlchemy to create database
+    ├── celery_worker.py # Code for celery worker
+    ├── database_tools.py # Tools for SQLAlchemy to create and update postgres database
     ├── main_upload_api.py # API code with requests
-    ├── settings.py # Code to import `.env` variables
+    ├── settings.py # Code to import `.env` variables. In current configuration contain few user tweaks. Main configuration is in `.env` file.
     └── templates # HTML templates for the application
 
 ## tests
@@ -108,18 +109,18 @@ Still to come
 
 # Known limitations
 * No mechanism to work when parts are distributed behind the proxy server or firewall (mainly to work in local network). Exept database and broker. This can be modified in future.
-* No security mechanisms to work in open network. (No authorization mechanism.)
-* File reception of API are limited by filesystem which is common across all the system.
-* Not tested in distributed setup. For example when reddis are in the LAN. But non localhost redis makes this a little bit pointless.
+* No security mechanisms to work in open network. (No authorization mechanism.) :heavy_exclamation_mark:
+* File reception of API are limited by filesystem which is common across all containers in current setup.
+* Not tested in distributed setup. For example when reddis are in the LAN. But non localhost redis makes this a little bit pointless. :heavy_exclamation_mark:
 * IDs are not secure numbers (can be guessed). But can be easily made so by using celery worker ID as ID.
 
 # TODO
-* CI/CD pipeline in github actions
-* `logs` Folder for logging. Make that the name and path of the folder can be altered in docker-compose.yml
-* Connection between celery worker results in Postgress and task ID for API database are not related. That can be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
-* Proper catch for out of range ID requests
-* Better querys for SQL
-* "Pending" status page
+* [x] CI/CD pipeline in github actions.
+* [ ] `logs` Folder for logging. Make that the name and path of the folder can be altered in docker-compose.yml
+* [ ] Connection between celery worker results in Postgress and task ID for API database are not related. That can be fixed easily to enable quicker result search time. However, I'm afraid I don't have time to do it right now.
+* [ ] Proper catch for out of range ID requests
+* [ ] Better querys for SQL
+* [ ] "Pending" status page
 
 # Other
 * Full task by task log of development was also posted in my telegram: https://t.me/ee_craft

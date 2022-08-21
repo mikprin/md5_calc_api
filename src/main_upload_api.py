@@ -34,7 +34,6 @@ root_path = pathlib.Path(__file__).parent.resolve()
 current_dir = pathlib.Path().resolve()
 logging.info(f"Working dir: {current_dir}")
 
-
 # There are two options for database: real one and a temp one in memory
 
 
@@ -85,23 +84,26 @@ async def get_file_hash(file_id: int ):
     return result
 
 @app.get("/gethash/{file_id}")
-async def get_file_hash_from_url(file_id: int ):
+async def get_file_hash_from_url(file_id: int , request: Request):
     ''' Get MD5 from the server back but pass URL as ID '''
     logging.info(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
     return result
 
 @app.get("/gethash-form/")
-async def get_file_hash_from_url(file_id: int ):
+async def get_file_hash_from_url(file_id: int , request: Request ):
     ''' Get MD5 from the server back but get HTML in return'''
     logging.info(f"Getting hash for {file_id}")
     result = await get_hash_from_database(file_id, database)
     if result["status"] == "SUCCESS":
-        return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] })
+        return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] ,  "request": request  })
     elif result["status"] == "PENDING":
         pass
+        # PENDING HTML
+        # return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] ,  "request": request  })
     else:
-        return templates.TemplateResponse("return_hash_error.html", { "status": result["status"] })
+        return templates.TemplateResponse("return_hash_error.html", { "status": result["status"] , "request": request  })
+    
 @app.post("/uploadfile/")
 async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
     ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
