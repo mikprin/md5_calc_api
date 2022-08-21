@@ -1,4 +1,3 @@
-<!-- https://github.com/mikprin/md5_calc_api/actions/workflows/docker-image.yml -->
 ![md5_calc_api](https://github.com/mikprin/md5_calc_api/actions/workflows/docker-image.yml/badge.svg)
 # Overview
 This is an API develop as a part of Bostongene onboarding contest. Goal was to create a distributed system to send file to API and get hash calculated on the backend with help of celery.
