@@ -2,6 +2,7 @@
 # from wsgiref.util import request_uri
 import requests
 import os, sys
+import numpy as np
 
 
 test_port = 8000
@@ -11,9 +12,21 @@ test_url = "http://127.0.0.1:8000/"
 
 test_script_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
-test_file_name = "test_file"
 
+
+test_file_name = "test_file"
 test_file_path = os.path.join( test_script_path , test_file_name)
+size = 20
+
+letters = np.array(list(chr(ord('a') + i) for i in range(26)));
+letters = np.append(letters, '\n' )
+text = np.random.choice(letters, size)
+# print(text)
+    
+with open(test_file_name, 'w+') as fout:
+    fout.write(str(text))
+
+
 
 
 def send_file(test_file_path,test_url):
