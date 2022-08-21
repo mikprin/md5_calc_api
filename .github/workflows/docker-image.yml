@@ -31,5 +31,12 @@ jobs:
           if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
     - name: Test with pytest
       run: |
-        sleep 10
-        pytest
+        sleep 1
+        # pytest
+        python3 tests/test_simple.py
+        echo "+++++++++++ celery_worker_0 +++++++++++ "
+        docker logs celery_worker_0
+        echo ""+++++++++++ celery_worker_1+++++++++++"
+        docker logs celery_worker_1
+        echo "+++++++++++ upload_api_inst "+++++++++++
+        docker logs upload_api_inst
