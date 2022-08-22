@@ -214,9 +214,6 @@ async def get_hash_result(file_id,database):
     if not task_id:
         return {"status" : "INVALID_ID" , "hash" : None }
     res = AsyncResult(task_id)
-    if res.status == "SUCCESS":
-        return {"status" : res.status , "hash" : res.result }
-    elif res.status == "PENDING":
-        return {"status" : res.status , "hash" : None }
-    else:
-        return {"status" : res.status , "hash" : None }
+    if res.status != ("SUCCESS" or "PENDING"):
+        logging.error(f"Status of {file_id} with task {task_id} is {res.status}")
+    return {"status" : res.status , "hash" : res.result }
