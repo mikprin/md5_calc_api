@@ -32,12 +32,10 @@ def test_simple(test_url = "http://localhost:8000/"):
 
     if celery_status == "PENDING":
         while celery_status == "PENDING":
-            
             response = get_hash(file_id,test_url)
             response_content = response.json()
             celery_status = response_content["status"]
             # print(f"celery_status is {celery_status}")
-            time.sleep(0.1)
     else:
         response = get_hash(file_id,test_url)
         response_content = response.json()
