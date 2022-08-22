@@ -1,41 +1,23 @@
-# from this import s
-# from urllib import response
 from test_reqests.recive_hash import *
 from test_reqests.send_file import send_file # Send file
 from test_reqests.get_hash import get_hash
 import argparse, time
 import hashlib, random
 import numpy as np
+from utils_for_test import generate_random_file , calc_hash
 
 test_file_size = 100
 test_file_range = (50,10000)
         
-def generate_random_file(path,size =1024):
-    
-    # n = size ** 2  # 1 Mb of text
-    letters = np.array(list(chr(ord('a') + i) for i in range(26)));
-    letters = np.append(letters, '\n' )
-    text = np.random.choice(letters, size)
-    # print(text)
-    
-    with open(path, 'w+') as fout:
-        fout.write(str(text))
-    # np.savetxt(path,text, delimiter='')
-    
-def calc_hash(file_path):
-    with open(file_path,'rb') as descriptor:
-        hash = hashlib.md5(descriptor.read()).hexdigest()
-    return hash
+
     
     
 def test_simple(test_url = "http://localhost:8000/"):
+    """Send file and get hash back"""
     test_file_name = "test_file"
     test_passed = 0
     random_file_size = random.randint(*test_file_range)
     generate_random_file(test_file_name, size=random_file_size)
-    
-    # send_time = 
-    
     
     response = send_file(test_file_name,test_url)
     start = time.time()
@@ -45,8 +27,7 @@ def test_simple(test_url = "http://localhost:8000/"):
         file_id = response_content["id"]
     else:
         # Send file FAIL here
-        pass
-
+        print(f"FAIL Failed to send file")
     if state == "PENDING":
         while state == "PENDING":
             response = get_hash(file_id,test_url)
@@ -69,15 +50,25 @@ def test_simple(test_url = "http://localhost:8000/"):
     print (f"total_time = {end - start}s ")
     assert test_passed == 1
     return test_passed
+  
+def test_out_of_range_id(test_url = "http://localhost:8000/"):
+    '''Test if out of range request is working!'''
+    test_passed = 0
+    out_of_range_id = 10000
+    response = get_hash(out_of_range_id,test_url).json()
+    if response["status"] == "INVALID_ID":
+        print("INVALID_ID test PASSED")
+        test_passed = 1
+    assert test_passed == 1
+    return test_passed
+    
+    
     
     
 if __name__ == '__main__':
-    
-    
     parser = argparse.ArgumentParser(description='Set of tests for MD5 api')
-    
     parser.add_argument('--url','--ip', type=str , help="URL or IP of test REST API")
-    parser.add_argument('--port', type=str , help="URL or IP of test API")
+    parser.add_argument('--port', type=str , help="port for the test API")
     args = parser.parse_args()
     if args.url:
         url = args.url
@@ -90,6 +81,6 @@ if __name__ == '__main__':
     
     test_url = f"http://{url}:{port}/"
     test_simple(test_url)
-    
+    test_out_of_range_id(test_url)
     sys.exit(0)
     
