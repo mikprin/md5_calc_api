@@ -5,7 +5,7 @@ This is an API develop as a part of Bostongene onboarding contest. Goal was to c
 ![Overview of the system](./doc/MD5_API_schematic_diagram.png)
 
 # Usage (API reference):
-You are free to use API docs `host:8000/docs` to check all by yourself. Or you can use request python scripts to quickly generate the POST requests. Or use them as reference. My text explanation is below:
+For deployment guide, please  check deployment section of this README. Here I describe how to work with installed API. You are free to use API docs `localhost:8000/docs` to check all by yourself in interactive uvicorn page. Or you can use request python scripts to quickly generate the POST requests from `tests/test_requests` folder. Or use them as reference. My text explanation for the protocol is below:
 ### To send file
 Client (browser or another host) can send HTTP post request containing the file under `file` field. In return, he will get JSON in the form of:
 `{ "success" : True/False , "id" : id/None, "celery_status" : status/None , "celery_id" : celery_task_id/none }`
@@ -66,7 +66,7 @@ Use `autoinstall.sh` to generate 2 empty folders (volumes) needed by the system 
 
 ## Removing the API
 
-To remove the API use `docker-compose stop && docker-compose rm` command when in the repository folder.
+To remove the API use `docker-compose stop && docker-compose rm` command when in the repository folder. This will stop working containers and remove it's internal data. To clean files you can use `rm -r appdata` in the repo folder.
 
 ## To add/remove worker
 
@@ -140,6 +140,8 @@ Run `pytest`, to execute test procedure for the basic flow.
 * [x] Tests
 * [x] Testing procedure description
 * [ ] Heavy tests
+* [ ] Get request for complete database and stats.
+* [ ] Possibly some worker statistics request.
 
 # Other
 * Full task by task log of development was also posted in my telegram: https://t.me/ee_craft
