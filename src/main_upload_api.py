@@ -1,25 +1,30 @@
-# Import config settings
+'''Man source for FastAPI code for distributed MD5 calculation'''
+
+# Standard imports
 import os
-from settings import *
-
-
-from datetime import datetime
+import logging,sys,os, glob, pathlib, time # logging, system
+import aiofiles
 
 from fastapi import FastAPI, File, UploadFile, Request, Body # fastapi
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import logging,sys,os, glob, pathlib, json, time # logging, system
-import aiofiles
-from threading import Thread
-from threading import Lock
-import random, pickle
-import numpy as np
 
+# Import config settings
+from settings import *
+
+# Worker import
 from celery_worker import  md5sum
+from celery import Celery
+from celery.result import AsyncResult
+os.environ["CELERY_RESULT_BACKEND"] = f"db+postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+# Celery init
+celery = Celery()
+celery.conf.broker_url = os.getenv("CELERY_BROKER_URL")
+celery.conf.result_backend = os.getenv("CELERY_BROKER_URL")
+
 
 ### Logging setup ###
-
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 log_handler = logging.StreamHandler(sys.stdout)
@@ -78,7 +83,7 @@ async def get_file_hash(file_id: int ):
     ''' Get MD5 from the server back. fild ID as input hash as output. '''
     logging.info(f"Getting hash for {file_id}")
     # print(f"Getting hash for {file_id}")
-    result = await get_hash_from_database(file_id, database)
+    result = await get_hash_result(file_id, database)
     # result = 1
     # Check that hash exists in the database here
     return result
@@ -87,14 +92,14 @@ async def get_file_hash(file_id: int ):
 async def get_file_hash_from_url(file_id: int , request: Request):
     ''' Get MD5 from the server back but pass URL as ID '''
     logging.info(f"Getting hash for {file_id}")
-    result = await get_hash_from_database(file_id, database)
+    result = await get_hash_result(file_id, database)
     return result
 
 @app.get("/gethash-form/")
 async def get_file_hash_from_url(file_id: int , request: Request ):
     ''' Get MD5 from the server back but get HTML in return'''
     logging.info(f"Getting hash for {file_id}")
-    result = await get_hash_from_database(file_id, database)
+    result = await get_hash_result(file_id, database)
     if result["status"] == "SUCCESS":
         return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] ,  "request": request  })
     elif result["status"] == "PENDING":
@@ -192,13 +197,26 @@ async def save_file(file, saved_file_path):
             await saved_file.write(content_of_file)
     logging.info(f"File saved as: {saved_file_path}")
     
-async def get_hash_from_database(file_id,database):
-    logging.debug("in get_hash_from_database method")
-    try:
-        logging.debug("in get_hash_from_database method TRY")
-        result = database.get_hashing_results(file_id)
-        return result
-    except Exception as err:
-        logging.error(f"When database.get_hashing_results error: with database. Error description: {err}")
-        result = { "status" : "DATABASE_FAIL" , "hash" : None }
-        return result
+# async def get_hash_from_database(file_id,database):
+#     """NOT USED METHOD"""
+#     logging.debug("in get_hash_from_database method")
+#     try:
+#         logging.debug("in get_hash_from_database method TRY")
+#         result = database.get_hashing_results(file_id)
+#         return result
+#     except Exception as err:
+#         logging.error(f"When database.get_hashing_results error: with database. Error description: {err}")
+#         result = { "status" : "DATABASE_FAIL" , "hash" : None }
+#         return result
+
+async def get_hash_result(file_id,database):
+    task_id = database.get_worker_id(file_id)
+    if not task_id:
+        return {"status" : "INVALID_ID" , "hash" : None }
+    res = AsyncResult(task_id)
+    if res.status == "SUCCESS":
+        return {"status" : res.status , "hash" : res.result }
+    elif res.status == "PENDING":
+        return {"status" : res.status , "hash" : None }
+    else:
+        return {"status" : res.status , "hash" : None }

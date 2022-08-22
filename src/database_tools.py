@@ -1,9 +1,8 @@
 # Database
-from hashlib import new
-import sqlalchemy as db
-import time, random, pickle
+import time, pickle
 import logging
 import sqlalchemy_utils as db_util
+import sqlalchemy as db
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Date, Enum, BigInteger, Integer, String
 from sqlalchemy.orm import declarative_base, relationship
@@ -103,31 +102,41 @@ class API_database( ):
             logging.info(f"Database rollback")
             return 0
 
+    def get_worker_id(self,id):
+        logging.debug(f"Looking for worker for element {id}")
+        with self.engine.connect() as conn:
+            result = conn.execute(f"SELECT * from files_quene WHERE id = '{id}'").all()
+        if result == []:
+            logging.debug(f"Invalid ID requested")
+            return None
+        worker_id = self.session.query(FileForProcessing).get(id).worker_id
+        logging.debug(f"Worker for  `{id}` found: {worker_id}")
+        return worker_id
+    
     def get_hashing_results(self, id):
         """Get hash results of request file id"""
         logging.debug(f"Looking for worker for element {id}")
         with self.engine.connect() as conn:
             result = conn.execute(f"SELECT * from files_quene WHERE id = '{id}'").all()
-        if result != []:
-            worker_id = self.session.query(FileForProcessing).get(id).worker_id
-            logging.debug(f"Worker for  `{id}` found: {worker_id}")
-
-            with self.engine.connect() as conn:
-                result = conn.execute(f"SELECT task_id,status,result from celery_taskmeta WHERE task_id = '{worker_id}'").all()
-            if result != []:
-                result_row = result[0]
-                status = result_row[1]
-                if status == "SUCCESS":
-                    hash = pickle.loads(result_row[2])
-                    logging.debug(f"Status {status} for element {id} with hash {hash}")
-                    return { "status" : status , "hash" : hash }
-                else:
-                    return { "status" : status , "hash" : None }
-            else:
-                # No worker found
-                return { "status" : "FIND_WORKER_ERROR" , "hash" : None }
-        else:
+        if result == []:
             return { "status" : "INVALID_ID" , "hash" : None }
+    
+        worker_id = self.session.query(FileForProcessing).get(id).worker_id
+        logging.debug(f"Worker for  `{id}` found: {worker_id}")
+
+        with self.engine.connect() as conn:
+            result = conn.execute(f"SELECT task_id,status,result from celery_taskmeta WHERE task_id = '{worker_id}'").all()
+        if result == []: # Early return if no result
+            # No worker found
+            logging.error(f"No worker in celery database for existing celery worker_id")
+            return { "status" : "FIND_WORKER_ERROR" , "hash" : None }
+        result_row = result[0]
+        status = result_row[1]
+        if status != "SUCCESS": # Early return if no result
+            return { "status" : status , "hash" : None }
+        hash = pickle.loads(result_row[2])
+        logging.debug(f"Status {status} for element {id} with hash {hash}")
+        return { "status" : status , "hash" : hash }    
     
     def drop_all_files(self):
         """Delete database table. Cruel."""

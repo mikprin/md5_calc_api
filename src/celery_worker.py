@@ -2,13 +2,10 @@
 import logging, os, time
 import hashlib, redis
 from celery import Celery
-
 from typing import Union
+
 # Import settings from env.
 from dotenv import load_dotenv
-
-
-
 
 env_folder = "../.env"
 load_dotenv(env_folder)  # take environment variables from .env.
@@ -16,19 +13,13 @@ load_dotenv(env_folder)  # take environment variables from .env.
 os.environ["CELERY_RESULT_BACKEND"] = f"db+postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 # CELERY_RESULT_BACKEND = 'db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}'
 
+
+# Celery init
 celery = Celery()
 celery.conf.broker_url = os.getenv("CELERY_BROKER_URL")
 celery.conf.result_backend = os.getenv("CELERY_BROKER_URL")
 
-# Configure Sherlock's locks to use Redis as the backend,
-# never expire locks (actually 120s) and retry acquiring an acquired lock after an
-# interval of 0.05 second.
-# import sherlock
-# from sherlock import RedisLock
-# sherlock.configure(expire=None, timeout=20,retry_interval=0.05)
 
-
-# CELERY_RESULT_BACKEND = 'db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}'
 @celery.task
 def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, delay_step = 0.5 , log_mutex_name = "log_mutex_new", artificial_delay  : Union[int,bool]  = False ):
     """Worker main function. Calculate hash of the file in `worker_appdata_mount_point` relative to container FS"""
@@ -75,8 +66,8 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
     if os.getenv("DELETE_FILE").lower() == 'true':
         os.remove(file_path)
     return hash
-    
-    
+
+
 def get_redis_connection():
     """Check if redis is ok. Get redis connection"""
     redis_connection = redis.StrictRedis(host=os.getenv("TRUE_REDIS_URL"), port=int(os.getenv("CELERY_BROKER_PORT")), db=2, decode_responses=True)

@@ -4,7 +4,7 @@ from test_reqests.get_hash import get_hash
 import argparse, time
 import hashlib, random
 import numpy as np
-from utils_for_test import generate_random_file , calc_hash
+from utils_for_test import generate_random_file , calc_hash, get_input_arguments
 
 test_file_size = 100
 test_file_range = (50,10000)
@@ -18,26 +18,31 @@ def test_simple(test_url = "http://localhost:8000/"):
     test_passed = 0
     random_file_size = random.randint(*test_file_range)
     generate_random_file(test_file_name, size=random_file_size)
-    
+
     response = send_file(test_file_name,test_url)
     start = time.time()
     response_content = response.json()
     state = response_content["success"]
+    celery_status = response_content["celery_status"]
     if state:
         file_id = response_content["id"]
     else:
         # Send file FAIL here
         print(f"FAIL Failed to send file")
-    if state == "PENDING":
-        while state == "PENDING":
+
+    if celery_status == "PENDING":
+        while celery_status == "PENDING":
+            
             response = get_hash(file_id,test_url)
             response_content = response.json()
-            state = response_content["status"]
+            celery_status = response_content["status"]
+            # print(f"celery_status is {celery_status}")
+            time.sleep(0.1)
     else:
         response = get_hash(file_id,test_url)
         response_content = response.json()
-        state = response_content["status"]
-    if state.upper() == "SUCCESS":
+        celery_status = response_content["status"]
+    if celery_status.upper() == "SUCCESS":
         print(f"Got response! Hash is {response_content['hash']}")
         if response_content["hash"] == calc_hash(test_file_name):
             print(f"Sucsessful and true hash calculation.")
@@ -66,20 +71,7 @@ def test_out_of_range_id(test_url = "http://localhost:8000/"):
     
     
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Set of tests for MD5 api')
-    parser.add_argument('--url','--ip', type=str , help="URL or IP of test REST API")
-    parser.add_argument('--port', type=str , help="port for the test API")
-    args = parser.parse_args()
-    if args.url:
-        url = args.url
-    else:
-        url = "localhost"
-    if args.port:
-        port = args.port
-    else:
-        port = "8000"
-    
-    test_url = f"http://{url}:{port}/"
+    test_url, args = get_input_arguments()
     test_simple(test_url)
     test_out_of_range_id(test_url)
     sys.exit(0)
