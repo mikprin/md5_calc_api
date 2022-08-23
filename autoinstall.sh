@@ -7,7 +7,7 @@ mkdir -p logs
 
 # Generate ENV:
 
-cp "$DIR/env_example" "$DIR/.env"
+# cp "$DIR/env_example" "$DIR/.env"
 
 cd $DIR
 docker-compose up -d --build
