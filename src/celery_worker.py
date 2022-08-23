@@ -49,9 +49,7 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
 
             # Log to file using mutex
             if redis_connection: # Check if redis connection exists
-                with redis_connection.lock(log_mutex_name):
-                    with open(logfile,'a+') as log:
-                        log.write(f"\n{file_path} : {hash}")
+                secure_log(f"\n{file_path} : {hash}" , redis_connection , logfile , log_mutex_name = "log_mutex")
                 # logging.debug(f"lock.locked() == {lock.locked()}")
             else:
                 logging.error(f"ERROR: No redis connection for mutex is availible. NO LOGGING IN FILE")
@@ -66,6 +64,13 @@ def md5sum(path,worker_appdata_mount_point = "../appdata", max_timeout = 20, del
     if os.getenv("DELETE_FILE").lower() == 'true':
         os.remove(file_path)
     return hash
+
+
+def secure_log(text , redis_connection , logfile , log_mutex_name = "log_mutex"):
+    """Log something securely using redis connection database as lock"""
+    with redis_connection.lock(log_mutex_name):
+        with open(logfile,'a+') as log:
+            log.write(text)
 
 
 def get_redis_connection():

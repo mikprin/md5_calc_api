@@ -57,7 +57,7 @@ def test_simple(test_url = "http://localhost:8000/"):
 def test_out_of_range_id(test_url = "http://localhost:8000/"):
     '''Test if out of range request is working!'''
     test_passed = 0
-    out_of_range_id = 10000
+    out_of_range_id = -1
     response = get_hash(out_of_range_id,test_url).json()
     if response["status"] == "INVALID_ID":
         print("INVALID_ID test PASSED")
