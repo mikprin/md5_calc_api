@@ -62,17 +62,17 @@ For testing features you can add `ARTIFITIAL_DELAY=10` to the `.env` file to add
 
 ### Settings
 
-Local settings are modified in `.env` file.  Example is presented in `env_example` file. Some other settings:
+Local settings are modified in `.env` file.  Example is presented in `env_example` file. DO not forget to copy `cp env_example .env`. Some other settings:
 
-`API_PORT=8000` - Default port of API (no default ! )
+`API_PORT=8000` - Default port of API ( no default ! )
 
-`CELERY_WORKER_FILESYSTEM_TIMEOUT=10` - This should indicate how long celery worker waits for file (if some glitches in OS appear and file are not there.)
+`CELERY_WORKER_FILESYSTEM_TIMEOUT=10` - This should indicate how long celery worker waits for file (if some glitches in OS appear and file are not there.) Expects integer value or 0.
 
 `DELETE_FILE=true/false`  : If true, worker will delete file as soon as hash has been hashed. (default `false`)
 
 `ARTIFITIAL_DELAY` - Indicates if extra delay is added for testing on working payload (Default off)
 
-`CHUNK_SIZE` -  Optionally you can save file in chunkes if RAM is limited. Default off. Example value int value (1024,2048)
+`CHUNK_SIZE` -  Optionally you can save file in chunkes if RAM is limited. Default off. Expects integer value: (1024,2048)
 
 # Deployment
 ## Automated
