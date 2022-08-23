@@ -130,17 +130,17 @@ async def create_upload_file_html(request: Request, source: str = "api" ,  file:
     else:
         return templates.TemplateResponse("return_error.html", { "request": request , "id": "FAILED" })
 
-if debug_api_calls:
+if DEBUG_API_CALLS:
     @app.get("/get-database/")
     async def get_database():
-        '''Debug call to return the database. Debug methods can be turned off with debug_api_calls = False'''
+        '''Debug call to return the database. This and other debug methods can be turned off with DEBUG_API_CALLS = False in main_upload_api.py file (or in general settings if this feature is done).'''
         logging.info(f'Database unload request!')
         #TODO return database here
         return "Your database will be here!"
     
     @app.post("/cleardatabase/")
     async def clear_database():
-        '''Debug call to clear all database. Debug methods can be turned off with debug_api_calls = False'''
+        '''Debug call to clear all database and delete all local files exept logs. This and other debug methods can be turned off with DEBUG_API_CALLS = False in main_upload_api.py file (or in general settings if this feature is done).'''
         logging.info(f'Deleting database!')
         database.drop_all_files()    
         logging.info(f'Deleting files!')
@@ -151,7 +151,7 @@ if debug_api_calls:
 
     @app.get("/error/")
     async def return_error_html(request: Request):
-        '''Debug call to get to error page'''
+        '''Debug call to get to error page to demonstrate it if no errors occur on the demo. This and other debug methods can be turned off with DEBUG_API_CALLS = False in main_upload_api.py file (or in general settings if this feature is done).'''
         return templates.TemplateResponse("return_error.html", { "request": request })
 
 
@@ -171,12 +171,8 @@ async def save_and_start_hashing(file, database):
     if database.add_file_to_quene(id, filename):
         saved_file_path = os.path.join( filesystem_work_point , filename)
         await save_file(file,saved_file_path)
-        artificial_delay = os.getenv("ARTIFITIAL_DELAY")
-        if artificial_delay:
-            artificial_delay_int = int(artificial_delay)
-        else:
-            artificial_delay_int = 0
-        worker = md5sum.delay(filename,artificial_delay = artificial_delay_int )
+        
+        worker = md5sum.delay(filename,artificial_delay = ARTIFITIAL_DELAY )
         database.add_worker_id(id,worker.id)
         return{ "success" : True , "id" : id, "celery_status" : worker.status, "celery_id" : worker.id }
     else:
@@ -185,10 +181,10 @@ async def save_and_start_hashing(file, database):
 
 
 async def save_file(file, saved_file_path):
-    if save_in_chunkes:
+    if CHUNK_SIZE:
         # Save file in chunks
         async with aiofiles.open(saved_file_path, 'wb') as saved_file:
-            while content_of_file := await file.read(chunk_size):  # async read chunk
+            while content_of_file := await file.read(CHUNK_SIZE):  # async read chunk
                 await saved_file.write(content_of_file)  # async write chunk
     else:
         # Save file in one piece
@@ -197,17 +193,6 @@ async def save_file(file, saved_file_path):
             await saved_file.write(content_of_file)
     logging.info(f"File saved as: {saved_file_path}")
     
-# async def get_hash_from_database(file_id,database):
-#     """NOT USED METHOD"""
-#     logging.debug("in get_hash_from_database method")
-#     try:
-#         logging.debug("in get_hash_from_database method TRY")
-#         result = database.get_hashing_results(file_id)
-#         return result
-#     except Exception as err:
-#         logging.error(f"When database.get_hashing_results error: with database. Error description: {err}")
-#         result = { "status" : "DATABASE_FAIL" , "hash" : None }
-#         return result
 
 async def get_hash_result(file_id,database):
     task_id = database.get_worker_id(file_id)

@@ -10,9 +10,27 @@ For deployment guide, please  check deployment section of this README. Here I de
 Client (browser or another host) can send HTTP post request containing the file under `file` field. In return, he will get JSON in the form of:
 `{ "success" : True/False , "id" : id/None, "celery_status" : status/None , "celery_id" : celery_task_id/none }`
 None values correspond to `"success" : False` case.
+
+Example of sending file request with `curl` where `FILE` is name of the file:
+
+```
+curl -X 'POST' \
+  'http://localhost:8000/uploadfile/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'file=@FILE;type=image/png'
+```
 ### To get hash
 To get hash, you can use `host:8000/get_hash/gethash/?file_id={id}` or send ID as request variable: As JSON  with `{"file_id" : id}` to `host:8000/get_hash/gethash/`. In return, you get JSON in a form of `{ "status" : status(str) , "hash" : hash(str) }`. In case task is not finished, status will be `'PENDING'`. In case of invalid `id` it should be `"status":'INVALID_ID'`.
 
+
+Example of sending file request with `curl` where `ID` is id which you got before:
+
+```
+curl -X 'GET' \
+  'http://localhost:8000/gethash/?file_id=ID' \
+  -H 'accept: application/json'
+```
 
 ### Frontend app
 
@@ -38,6 +56,7 @@ For testing features you can add `ARTIFITIAL_DELAY=10` to the `.env` file to add
     ├── .env                    #  Important file with environmental variables. autoinstall script can generate it.
     ├── env_example             #  This is a template for `.env` file.
     ├── Dockerfile              # Sinle docker file for both API and worker
+    ├── requirements.txt        # Requirements for the container to build. Not needed for usage or testing.
     ├── LICENSE
     └── README.md
 
@@ -45,13 +64,15 @@ For testing features you can add `ARTIFITIAL_DELAY=10` to the `.env` file to add
 
 Local settings are modified in `.env` file.  Example is presented in `env_example` file. Some other settings:
 
-`API_PORT=8000` - Default port of API
+`API_PORT=8000` - Default port of API (no default ! )
 
 `CELERY_WORKER_FILESYSTEM_TIMEOUT=10` - This should indicate how long celery worker waits for file (if some glitches in OS appear and file are not there.)
 
-`DELETE_FILE=true/false` default `false` : If true, worker will delete file as soon as hash has been hashed. 
+`DELETE_FILE=true/false`  : If true, worker will delete file as soon as hash has been hashed. (default `false`)
 
-`ARTIFITIAL_DELAY=0` - Indicates if extra delay is added for testing
+`ARTIFITIAL_DELAY` - Indicates if extra delay is added for testing on working payload (Default off)
+
+`CHUNK_SIZE` -  Optionally you can save file in chunkes if RAM is limited. Default off. Example value int value (1024,2048)
 
 # Deployment
 ## Automated
@@ -94,9 +115,10 @@ To add or remove worker you can just add new worker container in `docker-compose
 ## Dependencies
 ### Linux (any)
 Docker (for container managment). You can read about installing docker here: https://docs.docker.com/engine/install/
-### Ubuntu
-postgresql-devel: (libpq-dev in Debian/Ubuntu, libpq-devel on Centos/Fedora/Cygwin/Babun.). For SQL Alchemy to work.
 
+### Dependencies for testing
+
+python3, pytest, `tests/requirements.txt`.
 # Source structure
 
 ## src
@@ -119,7 +141,7 @@ Tests folder consists of a set of tests for the API goal. `test_simple.py` provi
 Related to task description, pictures, etc
 
 # Testing procedure
-
+Install python3 and test requirements from `tests/requirements.txt`
 Run `pytest`, to execute test procedure for the basic flow. 
 
 
@@ -129,6 +151,7 @@ Run `pytest`, to execute test procedure for the basic flow.
 * File reception of API are limited by filesystem which is common across all containers in current setup.
 * Not tested in distributed setup. For example when reddis are in the LAN. But non localhost redis makes this a little bit pointless. :heavy_exclamation_mark:
 * IDs are not secure numbers (can be guessed). But can be easily made so by using celery worker ID as ID.
+* MD5 is an outdated hasing algorithm but can easily be replaced with any other alternative or any other work function.
 
 # TODO
 * [x] CI/CD pipeline in github actions.
