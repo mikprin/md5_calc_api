@@ -1,4 +1,4 @@
-'''Man source for FastAPI code for distributed MD5 calculation'''
+'''Main source for FastAPI code for distributed MD5 calculation'''
 
 # Standard imports
 import os
@@ -66,15 +66,13 @@ os.makedirs(filesystem_work_point, exist_ok=True) # Where files saved in contain
 ### FastAPI ###
 
 app = FastAPI()
-# Static HTML
-
+# Static HTML directory include
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 async def root():
     ''' Root welcome JSON '''
-    # print("LOG LOG LOG")
     logging.info(f'Got root request!')
     return {"message": "Welcome you on my BG task submission API"}
 
@@ -104,24 +102,24 @@ async def get_file_hash_from_url(file_id: int , request: Request ):
         return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] ,  "request": request  })
     elif result["status"] == "PENDING":
         pass
-        # PENDING HTML
+        # PENDING HTML #TODO
         # return templates.TemplateResponse("return_hash.html", { "hash": result["hash"] ,  "request": request  })
     else:
         return templates.TemplateResponse("return_hash_error.html", { "status": result["status"] , "request": request  })
     
 @app.post("/uploadfile/")
 async def create_upload_file(request: Request ,  file: UploadFile = File(...)) :
-    ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
+    ''' Upload file and get ID of the file back. For  "HTML" return  then get /gethash-form/ endpoint  '''
     logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer!')
-    id = database.get_new_id()
+    id = database.get_new_id() # Generate new ID
     filename = str(id)
     result = await save_and_start_hashing(file,database) # LAUNCHING WORKER HERE
     return result
 
 @app.post("/uploadfile-html/")
 async def create_upload_file_html(request: Request, source: str = "api" ,  file: UploadFile = File(...)) :
-    ''' Upload file and get ID of the file back. If request.source = "HTML" then get HTML with ID '''
+    ''' Upload file and get ID of the file back. Get HTML with ID  in return'''
     logging.info(f"Incoming request: {request.body()}")
     logging.info(f'Got incoming file transfer from HTML page!')
     result = await save_and_start_hashing(file,database)
@@ -142,9 +140,10 @@ if DEBUG_API_CALLS:
     async def clear_database():
         '''Debug call to clear all database and delete all local files exept logs. This and other debug methods can be turned off with DEBUG_API_CALLS = False in main_upload_api.py file (or in general settings if this feature is done).'''
         logging.info(f'Deleting database!')
-        database.drop_all_files()    
+        database.drop_all_files() # delete database table   
         logging.info(f'Deleting files!')
         files = glob.glob(os.path.join(filesystem_work_point,"*"))
+        # Removing files
         for f in files:
             os.remove(f)
         return { "status" : "success" }
@@ -165,7 +164,7 @@ async def get_upload_form(request: Request):
 ### Non API async call functions ###
 
 async def save_and_start_hashing(file, database):
-    """In this function I save the file and call the celery worker. Get Worker ID and add it to database"""
+    """In this function I save the file and call the celery worker. Get Worker ID and add it to postgres database"""
     id = database.get_new_id()
     filename = str(id)
     if database.add_file_to_quene(id, filename):
@@ -181,13 +180,14 @@ async def save_and_start_hashing(file, database):
 
 
 async def save_file(file, saved_file_path):
+    '''Method to save a file to the container filesystem'''
     if CHUNK_SIZE:
         # Save file in chunks
         async with aiofiles.open(saved_file_path, 'wb') as saved_file:
             while content_of_file := await file.read(CHUNK_SIZE):  # async read chunk
                 await saved_file.write(content_of_file)  # async write chunk
     else:
-        # Save file in one piece
+        # Save file in one piece if CHUNK_SIZE is 0 or unset
         async with aiofiles.open(saved_file_path, "wb") as saved_file:
             content_of_file = await file.read()
             await saved_file.write(content_of_file)
